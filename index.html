@@ -1,0 +1,991 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>الاقتصاد</title>
+    <style>
+        /* لوحة ألوان مريحة جداً للعين (Emerald & Deep Slate) */
+        :root {
+            --bg-main: #0b0f17;
+            --bg-card: #151c28;
+            --bg-sub: #1c2536;
+            --emerald: #10b981;
+            --emerald-soft: rgba(16, 185, 129, 0.15);
+            --amber: #f59e0b;
+            --amber-soft: rgba(245, 158, 11, 0.12);
+            --sky: #38bdf8;
+            --rose: #f43f5e;
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --border: #263147;
+        }
+
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, system-ui, -apple-system, sans-serif;
+            background-color: var(--bg-main);
+            color: var(--text-primary);
+            margin: 0;
+            padding: 65px 12px 90px 12px; /* مساحة للهيدر العلوي والشريط السفلي */
+            line-height: 1.85;
+            font-size: 16px;
+        }
+
+        .container {
+            max-width: 820px;
+            margin: 0 auto;
+        }
+
+        /* الشريط العلوي المدمج (اسم المادة + أطوار الحفظ) */
+        .top-bar {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            height: 56px;
+            background: rgba(11, 15, 23, 0.92);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 16px;
+            z-index: 1000;
+        }
+
+        .brand {
+            font-size: 1.35em;
+            font-weight: 800;
+            color: var(--emerald);
+            letter-spacing: 0.5px;
+        }
+
+        .mode-switcher {
+            display: flex;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 3px;
+            gap: 4px;
+        }
+
+        .mode-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            padding: 5px 10px;
+            border-radius: 6px;
+            font-size: 0.85em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .mode-btn.active {
+            background: var(--emerald);
+            color: #000;
+        }
+
+        /* الأقسام (الصفحات) */
+        .page-section {
+            display: none;
+            animation: fadeSlide 0.3s ease-out;
+        }
+
+        .page-section.active {
+            display: block;
+        }
+
+        @keyframes fadeSlide {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* بطاقات Bento للدراسة */
+        .bento-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 18px;
+            margin-bottom: 16px;
+            transition: opacity 0.3s, border-color 0.3s, transform 0.2s;
+            position: relative;
+        }
+
+        /* ميزة طور التركيز (Spotlight Mode) */
+        body.spotlight-mode .bento-card {
+            opacity: 0.25;
+            filter: blur(1px);
+        }
+
+        body.spotlight-mode .bento-card.focused,
+        body.spotlight-mode .bento-card:hover {
+            opacity: 1;
+            filter: none;
+            border-color: var(--emerald);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.6);
+        }
+
+        /* مؤشر إتمام قراءة البطاقة */
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 10px;
+            margin-bottom: 14px;
+        }
+
+        .card-title {
+            margin: 0;
+            font-size: 1.15em;
+            color: var(--emerald);
+            font-weight: 700;
+        }
+
+        .check-pill {
+            background: var(--bg-sub);
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 0.8em;
+            cursor: pointer;
+            user-select: none;
+            transition: 0.2s;
+        }
+
+        .bento-card.read-done {
+            border-right: 4px solid var(--emerald);
+        }
+
+        .bento-card.read-done .check-pill {
+            background: var(--emerald-soft);
+            color: var(--emerald);
+            border-color: var(--emerald);
+        }
+
+        /* الكلمات التفاعلية للحفظ (Memory Keywords) */
+        .mem {
+            color: var(--sky);
+            font-weight: bold;
+            background: rgba(56, 189, 248, 0.1);
+            padding: 1px 6px;
+            border-radius: 5px;
+            border-bottom: 1px dashed var(--sky);
+            cursor: pointer;
+            transition: 0.25s;
+            display: inline-block;
+        }
+
+        /* عند تفعيل طور التسميع */
+        body.recall-mode .mem:not(.peek) {
+            background: var(--bg-sub);
+            color: transparent;
+            border-bottom: 2px solid var(--amber);
+            user-select: none;
+            min-width: 45px;
+            text-align: center;
+        }
+
+        body.recall-mode .mem:not(.peek)::after {
+            content: "؟";
+            color: var(--amber);
+            font-size: 0.9em;
+        }
+
+        /* تنسيق المعادلات الرياضية النقية (Pure HTML/CSS) */
+        .math-container {
+            background: #0d131d;
+            border: 1px solid var(--border);
+            border-right: 3px solid var(--sky);
+            border-radius: 10px;
+            padding: 14px;
+            margin: 12px 0;
+            overflow-x: auto;
+        }
+
+        .math-row {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            direction: ltr;
+            font-size: 1.15em;
+            font-weight: bold;
+            color: var(--text-primary);
+            flex-wrap: wrap;
+        }
+
+        .frac {
+            display: inline-flex;
+            flex-direction: column;
+            align-items: center;
+            vertical-align: middle;
+            text-align: center;
+            padding: 0 4px;
+        }
+
+        .num {
+            border-bottom: 2px solid var(--sky);
+            padding: 0 6px 2px;
+            color: var(--sky);
+        }
+
+        .den {
+            padding: 2px 6px 0;
+            color: var(--emerald);
+        }
+
+        .arrow {
+            color: var(--amber);
+            font-weight: bold;
+            margin: 0 4px;
+        }
+
+        /* الجداول */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 12px 0;
+            background: #0d131d;
+            border-radius: 10px;
+            overflow: hidden;
+            font-size: 0.95em;
+        }
+
+        th, td {
+            padding: 10px;
+            text-align: center;
+            border: 1px solid var(--border);
+        }
+
+        th {
+            background: var(--bg-sub);
+            color: var(--emerald);
+        }
+
+        /* الرسوم البيانية (SVG) */
+        .svg-box {
+            background: #0d131d;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 15px 10px;
+            margin: 14px 0;
+            text-align: center;
+        }
+
+        .svg-caption {
+            font-size: 0.85em;
+            color: var(--text-secondary);
+            margin-top: 8px;
+        }
+
+        svg {
+            max-width: 100%;
+            height: auto;
+        }
+
+        .axis { stroke: #64748b; stroke-width: 2; }
+        .curve { stroke: var(--emerald); stroke-width: 3; fill: none; }
+        .dashed { stroke: #475569; stroke-width: 1.5; stroke-dasharray: 4,4; }
+        .point { fill: var(--amber); cursor: pointer; transition: r 0.2s; }
+        .point:hover { r: 7; }
+        svg text { fill: var(--text-primary); font-family: sans-serif; font-size: 13px; }
+
+        /* الصناديق التنبيهية */
+        .note-box {
+            background: var(--amber-soft);
+            border-right: 4px solid var(--amber);
+            padding: 14px;
+            border-radius: 8px;
+            margin: 12px 0;
+            font-size: 0.95em;
+        }
+
+        /* الشريط السفلي العائم للتنقل السريع */
+        .bottom-nav {
+            position: fixed;
+            bottom: 12px;
+            left: 12px;
+            right: 12px;
+            max-width: 550px;
+            margin: 0 auto;
+            background: rgba(21, 28, 40, 0.95);
+            backdrop-filter: blur(15px);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            display: flex;
+            justify-content: space-around;
+            padding: 8px 6px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+            z-index: 1000;
+        }
+
+        .nav-item {
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 0.85em;
+            font-weight: bold;
+            padding: 8px 12px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: 0.2s;
+            flex: 1;
+            text-align: center;
+        }
+
+        .nav-item.active {
+            background: var(--emerald-soft);
+            color: var(--emerald);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+
+        /* تصميم الاختبار التفاعلي (Quiz) */
+        .quiz-option {
+            display: block;
+            width: 100%;
+            text-align: right;
+            background: var(--bg-sub);
+            border: 1px solid var(--border);
+            color: var(--text-primary);
+            padding: 12px 15px;
+            margin-top: 8px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.95em;
+            transition: 0.2s;
+        }
+
+        .quiz-option.correct {
+            background: rgba(16, 185, 129, 0.2);
+            border-color: var(--emerald);
+            color: var(--emerald);
+            font-weight: bold;
+        }
+
+        .quiz-option.wrong {
+            background: rgba(244, 63, 94, 0.2);
+            border-color: var(--rose);
+            color: var(--rose);
+        }
+
+        /* إخفاء المصادر برمجياً */
+        .cite { display: none !important; }
+    </style>
+</head>
+<body>
+
+    <!-- الشريط العلوي المدمج -->
+    <div class="top-bar">
+        <div class="brand">الاقتصاد</div>
+        <div class="mode-switcher">
+            <button class="mode-btn active" onclick="setMode('read', this)">📖 قراءة</button>
+            <button class="mode-btn" onclick="setMode('recall', this)">🧠 تسميع</button>
+            <button class="mode-btn" onclick="setMode('spotlight', this)">🎯 تركيز</button>
+        </div>
+    </div>
+
+    <div class="container">
+
+        <!-- ==================== القسم 1: مرونة القوس ==================== -->
+        <div id="sec-arc" class="page-section active">
+            
+            <div class="bento-card" onclick="focusCard(this)">
+                <div class="card-header">
+                    <h2 class="card-title">ثامناً: مرونة القوس (Arc Elasticity)</h2>
+                    <span class="check-pill" onclick="toggleDone(event, this)">✔ فهمتها</span>
+                </div>
+                <p>
+                    تمثل مرونة القوس قياس المرونة بين <span class="mem" onclick="peek(this)">نقطتين محددتين</span> على منحنى طلب معين وتستخدم للتغيرات <span class="mem" onclick="peek(this)">الكبيرة</span>.<span class="cite">[span_9](start_span)[span_9](end_span)</span>
+                    على سبيل المثال فإن قياس المرونة بين النقطتين (j) و (k) في الشكل أدناه، هو مرونة القوس.<span class="cite">[span_10](start_span)[span_10](end_span)</span>
+                </p>
+
+                <!-- الرسم البياني 1: مرونة القوس -->
+                <div class="svg-box">
+                    <svg width="300" height="200" viewBox="0 0 300 200">
+                        <line x1="45" y1="15" x2="45" y2="165" class="axis" />
+                        <line x1="45" y1="165" x2="280" y2="165" class="axis" />
+                        <text x="28" y="25" font-weight="bold">P</text>
+                        <text x="285" y="170" font-weight="bold">Q</text>
+                        <text x="30" y="182">0</text>
+                        
+                        <line x1="65" y1="45" x2="245" y2="155" class="curve" />
+                        <text x="255" y="150" font-weight="bold">D</text>
+
+                        <!-- النقطة j -->
+                        <line x1="45" y1="78" x2="120" y2="78" class="dashed" />
+                        <line x1="120" y1="78" x2="120" y2="165" class="dashed" />
+                        <circle cx="120" cy="78" r="5" class="point" />
+                        <text x="125" y="68" font-weight="bold">j</text>
+                        <text x="20" y="83">20</text>
+                        <text x="112" y="185">43</text>
+
+                        <!-- النقطة k -->
+                        <line x1="45" y1="130" x2="205" y2="130" class="dashed" />
+                        <line x1="205" y1="130" x2="205" y2="165" class="dashed" />
+                        <circle cx="205" cy="130" r="5" class="point" />
+                        <text x="212" y="120" font-weight="bold">k</text>
+                        <text x="20" y="135">10</text>
+                        <text x="197" y="185">75</text>
+                    </svg>
+                    <div class="svg-caption">مثال: احسب 1- مرونة القوس من (j) إلى (k) | 2- مرونة القوس من (k) إلى (j)<span class="cite">[span_11](start_span)[span_11](end_span)</span></div>
+                </div>
+            </div>
+
+            <!-- حل الفرع الأول -->
+            <div class="bento-card" onclick="focusCard(this)">
+                <div class="card-header">
+                    <h2 class="card-title">1) احتساب المرونة من (j) إلى (k)</h2>
+                    <span class="check-pill" onclick="toggleDone(event, this)">✔ فهمتها</span>
+                </div>
+                
+                <p>الجواب: يمكن احتساب المرونة بين النقطتين بالصيغة التالية:<span class="cite">[span_12](start_span)[span_12](end_span)</span></p>
+                
+                <div class="math-container">
+                    <div class="math-row">
+                        <span>Ed =</span>
+                        <div class="frac"><span class="num">%ΔQd</span><span class="den">%ΔP</span></div>
+                        <span class="arrow">⇒</span>
+                        <div class="frac"><span class="num">ΔQd</span><span class="den">ΔP</span></div>
+                        <span>×</span>
+                        <div class="frac"><span class="num">P</span><span class="den">Qd</span></div>
+                    </div>
+                </div>
+
+                <table>
+                    <tr><th>التغير</th><th>P</th><th>Q</th></tr>
+                    <tr><td>1</td><td>20</td><td>43</td></tr>
+                    <tr><td>2</td><td>10</td><td>75</td></tr>
+                </table>
+
+                <div class="math-container">
+                    <div class="math-row">
+                        <span>Ed =</span>
+                        <div class="frac"><span class="num">Q2 - Q1</span><span class="den">P2 - P1</span></div>
+                        <span>×</span>
+                        <div class="frac"><span class="num">P1</span><span class="den">Q1</span></div>
+                        <span class="arrow">⇒</span>
+                        <div class="frac"><span class="num">75 - 43</span><span class="den">10 - 20</span></div>
+                        <span>×</span>
+                        <div class="frac"><span class="num">20</span><span class="den">43</span></div>
+                        <span class="arrow">→</span>
+                        <div class="frac"><span class="num">32</span><span class="den">-10</span></div>
+                        <span>×</span>
+                        <div class="frac"><span class="num">20</span><span class="den">43</span></div>
+                        <span class="arrow">→</span>
+                        <div class="frac"><span class="num">640</span><span class="den">-430</span></div>
+                        <span>=</span>
+                        <span class="mem" onclick="peek(this)">-1.49</span>
+                    </div>
+                </div>
+
+                <p>
+                    <strong>التعليق:</strong> بمعنى أن انخفاضاً قدره (1%) في سعر السلعة (x) ينجم عنه <span class="mem" onclick="peek(this)">زيادة مقدارها (1.49%)</span> في الطلب على السلعة.<span class="cite">[span_13](start_span)[span_13](end_span)</span>
+                </p>
+            </div>
+
+            <!-- تنبيه متخذ القرار وحل الفرع الثاني -->
+            <div class="bento-card" onclick="focusCard(this)">
+                <div class="card-header">
+                    <h2 class="card-title">2) التحرك المقلوب من (k) إلى (j) وتحذير القرار</h2>
+                    <span class="check-pill" onclick="toggleDone(event, this)">✔ فهمتها</span>
+                </div>
+
+                <div class="note-box">
+                    إن استخدام مرونة القوس يستلزم <span class="mem" onclick="peek(this)">عناية كبيرة</span> من جانب متخذ القرار، لأنها قد تنطوي على احتمال الوقوع في الخطأ.<span class="cite">[span_14](start_span)[span_14](end_span)</span> حيث <span class="mem" onclick="peek(this)">يختلف</span> معامل مرونة القوس بين نفس النقطتين على منحنى الطلب، إذا <span class="mem" onclick="peek(this)">انقلب اتجاه التغير</span> في سعر السلعة.<span class="cite">[span_15](start_span)[span_15](end_span)</span> فإذا كانت مرونة القوس تساوي (1.49%) عند التحرك من النقطة (j) إلى النقطة (K)؛ فإن هذه المرونة لا تظل كما هي، بل تتغير عند التحرك من النقطة (K) إلى النقطة (j). إن التحرك المقلوب في سعر السلعة ينطوي على معامل مرونة مختلف.<span class="cite">[span_16](start_span)[span_16](end_span)</span>
+                </div>
+
+                <table>
+                    <tr><th>التغير</th><th>P</th><th>Q</th></tr>
+                    <tr><td>1</td><td>10</td><td>75</td></tr>
+                    <tr><td>2</td><td>20</td><td>43</td></tr>
+                </table>
+
+                <div class="math-container">
+                    <div class="math-row">
+                        <span>Ed =</span>
+                        <div class="frac"><span class="num">Q2 - Q1</span><span class="den">P2 - P1</span></div>
+                        <span>×</span>
+                        <div class="frac"><span class="num">P1</span><span class="den">Q1</span></div>
+                        <span class="arrow">→</span>
+                        <div class="frac"><span class="num">43 - 75</span><span class="den">20 - 10</span></div>
+                        <span>×</span>
+                        <div class="frac"><span class="num">10</span><span class="den">75</span></div>
+                        <span class="arrow">→</span>
+                        <div class="frac"><span class="num">-32</span><span class="den">10</span></div>
+                        <span>×</span>
+                        <div class="frac"><span class="num">10</span><span class="den">75</span></div>
+                        <span class="arrow">→</span>
+                        <div class="frac"><span class="num">320</span><span class="den">750</span></div>
+                        <span>=</span>
+                        <span class="mem" onclick="peek(this)">0.43</span>
+                    </div>
+                </div>
+
+                <p>
+                    <strong>التعليق:</strong> بمعنى أن ارتفاع قدره (1%) في سعر السلعة (x) ينجم عنه <span class="mem" onclick="peek(this)">انخفاض مقدارها (0.43%)</span> في الطلب على السلعة.<span class="cite">[span_17](start_span)[span_17](end_span)</span>
+                </p>
+                <p>
+                    حيث يظهر أمامنا أن مقياس معامل المرونة يختلف عندما يكون إتجاه تحرك سعر السلعة مقلوباً. أي أن معامل مرونة القوس يعتمد أيضاً على <span class="mem" onclick="peek(this)">اتجاه التغير</span> في سعر السلعة.<span class="cite">[span_18](start_span)[span_18](end_span)</span>
+                </p>
+            </div>
+        </div>
+
+        <!-- ==================== القسم 2: مرونة النقطة ==================== -->
+        <div id="sec-point" class="page-section">
+            
+            <div class="bento-card" onclick="focusCard(this)">
+                <div class="card-header">
+                    <h2 class="card-title">تاسعاً: مرونة النقطة (Point Elasticity)</h2>
+                    <span class="check-pill" onclick="toggleDone(event, this)">✔ فهمتها</span>
+                </div>
+                <p>
+                    من الطرق الأخرى لتبسيط مشكلة قياس مرونة الطلب، استخدام فكرة مرونة النقطة. ويمكن أن نفترض ابتداءً وجود <span class="mem" onclick="peek(this)">منحنى طلب خطي</span>؛ حيث تكون تركيبة التغير في سعر والكمية المطلوبة <span class="mem" onclick="peek(this)">متناهية في الصغر</span>.<span class="cite">[span_19](start_span)[span_19](end_span)</span>
+                    وهنا فإن طلب النقطة تمثل المرونة في <span class="mem" onclick="peek(this)">نقطة محددة</span> على منحنى طلب خطي أي على خط الطلب مثل مرونة النقطة (P) أو النقطة (B) على منحنى الطلب (DM)، (وهي بديل لفكرة المرونة بين نقطتين التي تمثل مرونة القوس).<span class="cite">[span_20](start_span)[span_20](end_span)</span>
+                </p>
+
+                <!-- الرسم البياني 2: التحرك المتناهي في الصغر على الخط DM -->
+                <div class="svg-box">
+                    <svg width="300" height="200" viewBox="0 0 300 200">
+                        <line x1="45" y1="15" x2="45" y2="165" class="axis" />
+                        <line x1="45" y1="165" x2="280" y2="165" class="axis" />
+                        <text x="15" y="40">السعر</text>
+                        <text x="245" y="185">الكمية</text>
+                        <text x="32" y="180">0</text>
+
+                        <!-- الخط المستقيم DM -->
+                        <line x1="45" y1="35" x2="235" y2="165" class="curve" />
+                        <text x="28" y="42" font-weight="bold">D</text>
+                        <text x="235" y="182" font-weight="bold">M</text>
+
+                        <!-- النقاط P, B, L -->
+                        <circle cx="95" cy="69" r="4" class="point" />
+                        <text x="98" y="62" font-weight="bold">P</text>
+                        <line x1="95" y1="69" x2="95" y2="165" class="dashed" />
+                        <text x="90" y="182">Q</text>
+
+                        <circle cx="145" cy="103" r="4" class="point" />
+                        <text x="148" y="96" font-weight="bold">B</text>
+                        <line x1="145" y1="103" x2="145" y2="165" class="dashed" />
+                        <line x1="95" y1="103" x2="145" y2="103" class="dashed" />
+                        <text x="140" y="182">N</text>
+
+                        <circle cx="190" cy="134" r="4" class="point" />
+                        <text x="195" y="128" font-weight="bold">L</text>
+                        <line x1="190" y1="134" x2="190" y2="165" class="dashed" />
+                        <line x1="145" y1="134" x2="190" y2="134" class="dashed" />
+                    </svg>
+                </div>
+
+                <p>
+                    إن التحرك من النقطة (B) نحو النقطة (P) يتضمن تغيراً في سعر السلعة (ΔP) ولكن بمقدار <span class="mem" onclick="peek(this)">أصغر فأصغر</span> حتى نصل إلى النقطة (P) تقريباً، حيث يصبح التغير في السعر متناهياً في الصغر.<span class="cite">[span_21](start_span)[span_21](end_span)</span>
+                </p>
+            </div>
+
+            <!-- الاشتقاق الرياضي والهندسي الكامل -->
+            <div class="bento-card" onclick="focusCard(this)">
+                <div class="card-header">
+                    <h2 class="card-title">الصيغة الرياضية والاشتقاق الهندسي</h2>
+                    <span class="check-pill" onclick="toggleDone(event, this)">✔ فهمتها</span>
+                </div>
+                <p>
+                    إن قياس مرونة التغير الطفيف في السعر يماثل قياس المرونة في نقطة واحدة (Sin p) وإن صيغة قياس مرونة النقطة تماثل صيغة مرونة القوس. ويمكن التعبير عن مرونة النقطة (ep) بالصيغة التالية:<span class="cite">[span_22](start_span)[span_22](end_span)</span>
+                </p>
+
+                <div class="math-container">
+                    <div class="math-row">
+                        <span>Ep =</span>
+                        <div class="frac"><span class="num">∂Q</span><span class="den">∂P</span></div>
+                        <span>×</span>
+                        <div class="frac"><span class="num">P</span><span class="den">Q</span></div>
+                    </div>
+                </div>
+
+                <p>
+                    حيث تم الاستعاضة عن صيغة (ΔQd / ΔP) بالصيغة (∂Q / ∂P) والتي تمثل <span class="mem" onclick="peek(this)">المشتقة</span> تعبر عن انحدار خط الطلب (DM).<span class="cite">[span_23](start_span)[span_23](end_span)</span>
+                    وهكذا فإن مرونة النقطة إنما تعبر عن نسبة السعر إلى الكمية المطلوبة في نقطة معينة، كما تعبر أيضاً عن درجة انحدار معينة لخط الطلب.<span class="cite">[span_24](start_span)[span_24](end_span)</span>
+                </p>
+                <p>
+                    أن انحدار الخط المستقيم (DM) في النقطة (P)، يعطينا هندسياً <span class="mem" onclick="peek(this)">(QM / PQ)</span> بحيث أن (∂Q / ∂P = QM / PQ).<span class="cite">[span_25](start_span)[span_25](end_span)</span>
+                    حيث نجد أنه في النقطة (P) تصبح <span class="mem" onclick="peek(this)">(P = PQ)</span>، كما أن <span class="mem" onclick="peek(this)">(Q = 0Q)</span>. وبالتعويض نصل إلى:<span class="cite">[span_26](start_span)[span_26](end_span)</span>
+                </p>
+
+                <div class="math-container">
+                    <div class="math-row">
+                        <span>Ep =</span>
+                        <div class="frac"><span class="num">QM</span><span class="den">PQ</span></div>
+                        <span>×</span>
+                        <div class="frac"><span class="num">PQ</span><span class="den">0Q</span></div>
+                        <span class="arrow">⇒</span>
+                        <span>Ep =</span>
+                        <div class="frac"><span class="num">QM</span><span class="den">0Q</span></div>
+                    </div>
+                </div>
+
+                <p>
+                    ومن الناحية الهندسية، يمكن القول أن المرونة السعرية لنقطة معينة على منحنى طلب خطي (أي على خط الطلب) تساوي نسبة <span class="mem" onclick="peek(this)">الجزء الأيمن</span> إلى <span class="mem" onclick="peek(this)">الجزء الأيسر</span> من خط الطلب أي أن:<span class="cite">[span_27](start_span)[span_27](end_span)</span>
+                </p>
+
+                <div class="math-container">
+                    <div class="math-row" style="direction: rtl;">
+                        <span>Ep =</span>
+                        <div class="frac">
+                            <span class="num">الجزء الايمن</span>
+                            <span class="den">الجزء الايسر</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- مثال النقاط الخمس والرسوم الخاصة بها -->
+            <div class="bento-card" onclick="focusCard(this)">
+                <div class="card-header">
+                    <h2 class="card-title">مثال: إيجاد مرونة النقاط (D, P, B, L, M)</h2>
+                    <span class="check-pill" onclick="toggleDone(event, this)">✔ فهمتها</span>
+                </div>
+                <p>وبناء على ذلك، من الملاحظ الطلب ذو الخط المستقيم له <span class="mem" onclick="peek(this)">مرونات مختلفة</span> باختلاف موقع النقاط عليه:<span class="cite">[span_28](start_span)[span_28](end_span)</span></p>
+
+                <!-- الرسمان البيانيان 3 و 4 في الملزمة -->
+                <div class="svg-box">
+                    <svg width="320" height="210" viewBox="0 0 320 210">
+                        <line x1="40" y1="20" x2="40" y2="170" class="axis" />
+                        <line x1="40" y1="170" x2="290" y2="170" class="axis" />
+                        <text x="12" y="45">السعر</text>
+                        <text x="260" y="198">الكمية</text>
+
+                        <line x1="40" y1="35" x2="260" y2="170" class="curve" />
+
+                        <!-- D (0) -->
+                        <circle cx="40" cy="35" r="4" class="point" />
+                        <text x="48" y="30">D (Ed = ∞)</text>
+                        <text x="35" y="190">0</text>
+
+                        <!-- P (5) -->
+                        <line x1="95" y1="69" x2="95" y2="170" class="dashed" />
+                        <circle cx="95" cy="69" r="4" class="point" />
+                        <text x="102" y="64">P (Ed &gt; 1)</text>
+                        <text x="90" y="190">5</text>
+
+                        <!-- B (10) -->
+                        <line x1="150" y1="102" x2="150" y2="170" class="dashed" />
+                        <circle cx="150" cy="102" r="4" class="point" />
+                        <text x="157" y="97">B (Ed = 1)</text>
+                        <text x="142" y="190">10</text>
+
+                        <!-- L (15) -->
+                        <line x1="205" y1="136" x2="205" y2="170" class="dashed" />
+                        <circle cx="205" cy="136" r="4" class="point" />
+                        <text x="212" y="131">L (Ed &lt; 1)</text>
+                        <text x="197" y="190">15</text>
+
+                        <!-- M (20) -->
+                        <circle cx="260" cy="170" r="4" class="point" />
+                        <text x="265" y="162">M (Ed = 0)</text>
+                        <text x="252" y="190">20</text>
+                    </svg>
+                </div>
+
+                <table>
+                    <tr>
+                        <th>النقاط</th>
+                        <th>تطبيق القانون (الايمن / الايسر)</th>
+                        <th>معامل المرونة (Ed)</th>
+                    </tr>
+                    <tr>
+                        <td><strong>M</strong></td>
+                        <td dir="ltr">0 / 20 = 0</td>
+                        <td><span class="mem" onclick="peek(this)">Ed = 0</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>L</strong></td>
+                        <td dir="ltr">5 / 15 = 0.3</td>
+                        <td><span class="mem" onclick="peek(this)">Ed &lt; 1</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>B</strong></td>
+                        <td dir="ltr">10 / 10 = 1</td>
+                        <td><span class="mem" onclick="peek(this)">Ed = 1</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>P</strong></td>
+                        <td dir="ltr">15 / 5 = 3</td>
+                        <td><span class="mem" onclick="peek(this)">Ed &gt; 1</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>D</strong></td>
+                        <td dir="ltr">20 / 0 = ∞</td>
+                        <td><span class="mem" onclick="peek(this)">Ed = ∞</span></td>
+                    </tr>
+                </table>
+                <span class="cite">[span_29](start_span)[span_29](end_span)</span>
+            </div>
+
+            <!-- منحنى الطلب غير الخطي -->
+            <div class="bento-card" onclick="focusCard(this)">
+                <div class="card-header">
+                    <h2 class="card-title">حالة منحنى الطلب غير الخطي</h2>
+                    <span class="check-pill" onclick="toggleDone(event, this)">✔ فهمتها</span>
+                </div>
+                <p>
+                    أما إذ كان منحنى الطلب غير خطي، فأن قياس مرونة النقطة يستلزم رسم <span class="mem" onclick="peek(this)">خط مماس</span> لمنحنى الطلب، بحيث يحصل التماس في النقطة التي نريد قياس درجة مرونتها (النقطة P مثلاً). وان مرونة الطلب في نقطة التماس ستكون <span class="mem" onclick="peek(this)">مساوية لمرونة الخط</span> في تلك النقطة.<span class="cite">[span_30](start_span)[span_30](end_span)</span>
+                    حيث نجد في الرسم البياني ان الخط (MN) يمس منحنى الطلب في نقطة (P). وان مرونة هذه النقطة هي:<span class="cite">[span_31](start_span)[span_31](end_span)</span>
+                </p>
+
+                <div class="math-container">
+                    <div class="math-row">
+                        <span>Ep =</span>
+                        <div class="frac"><span class="num">PN</span><span class="den">PM</span></div>
+                        <span>=</span>
+                        <div class="frac"><span class="num">QN</span><span class="den">0Q</span></div>
+                    </div>
+                </div>
+
+                <!-- الرسم البياني 5: المنحنى غير الخطي والخط المماس -->
+                <div class="svg-box">
+                    <svg width="300" height="200" viewBox="0 0 300 200">
+                        <line x1="45" y1="15" x2="45" y2="165" class="axis" />
+                        <line x1="45" y1="165" x2="280" y2="165" class="axis" />
+                        <text x="15" y="35">السعر</text>
+                        <text x="245" y="185">الكمية</text>
+                        <text x="32" y="182">0</text>
+
+                        <!-- الخط المماس MN -->
+                        <line x1="45" y1="45" x2="230" y2="165" stroke="#38bdf8" stroke-width="2" />
+                        <text x="28" y="50" font-weight="bold">M</text>
+                        <text x="230" y="182" font-weight="bold">N</text>
+
+                        <!-- المنحنى غير الخطي -->
+                        <path d="M 95 25 Q 105 112 215 130" fill="none" stroke="#10b981" stroke-width="3.5" />
+
+                        <!-- نقطة التماس P -->
+                        <circle cx="132" cy="101" r="5" class="point" />
+                        <text x="138" y="95" font-weight="bold">P</text>
+                        <line x1="45" y1="101" x2="132" y2="101" class="dashed" />
+                        <line x1="132" y1="101" x2="132" y2="165" class="dashed" />
+                        <text x="28" y="105">R</text>
+                        <text x="127" y="182">Q</text>
+                    </svg>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== القسم 3: نظرية العرض ==================== -->
+        <div id="sec-supply" class="page-section">
+
+            <div class="bento-card" onclick="focusCard(this)">
+                <div class="card-header">
+                    <h2 class="card-title">الفصل الثاني: نظرية العرض</h2>
+                    <span class="check-pill" onclick="toggleDone(event, this)">✔ فهمتها</span>
+                </div>
+                <p>
+                    <strong>عرض السوق:</strong> الكميات التي يرتضي <span class="mem" onclick="peek(this)">البائعون والمنتجون</span> بيعها في وقت معين، مقابل مستويات مختلفة من الأسعار، بافتراض <span class="mem" onclick="peek(this)">بقاء الأمور الأخرى على حالها</span>. وجدول العرض يمثل العلاقة <span class="mem" onclick="peek(this)">الموجبة (الطردية)</span> بين السعر والكمية.<span class="cite">[span_32](start_span)[span_32](end_span)[span_33](start_span)[span_33](end_span)</span>
+                </p>
+                <p>
+                    <strong>الفرق بين العرض والكمية المعروضة:</strong><br>
+                    • <strong>العرض:</strong> <span class="mem" onclick="peek(this)">كافة العلاقة</span> بين السعر والكمية، أي قائمة الكميات عند الأسعار المختلفة.<br>
+                    • <strong>الكمية المعروضة:</strong> <span class="mem" onclick="peek(this)">كمية معينة</span>، أي <span class="mem" onclick="peek(this)">نقطة محددة</span> من القائمة أو من منحنى العرض.<span class="cite">[span_34](start_span)[span_34](end_span)[span_35](start_span)[span_35](end_span)[span_36](start_span)[span_36](end_span)</span>
+                </p>
+            </div>
+
+            <!-- جدول ومنحنى العرض الافتراضي كامل -->
+            <div class="bento-card" onclick="focusCard(this)">
+                <div class="card-header">
+                    <h2 class="card-title">جدول (1) وشكل (1) ودالة العرض</h2>
+                    <span class="check-pill" onclick="toggleDone(event, this)">✔ فهمتها</span>
+                </div>
+
+                <table>
+                    <tr>
+                        <th>سعر وحدة السلعة (دينار)</th>
+                        <th>الكمية المعروضة (شهريا)</th>
+                    </tr>
+                    <tr><td>600</td><td><span class="mem" onclick="peek(this)">1900</span></td></tr>
+                    <tr><td>500</td><td><span class="mem" onclick="peek(this)">1700</span></td></tr>
+                    <tr><td>400</td><td><span class="mem" onclick="peek(this)">1300</span></td></tr>
+                    <tr><td>300</td><td><span class="mem" onclick="peek(this)">1000</span></td></tr>
+                    <tr><td>200</td><td><span class="mem" onclick="peek(this)">600</span></td></tr>
+                </table>
+                <span class="cite">[span_43](start_span)[span_43](end_span)</span>
+
+                <!-- الرسم البياني 6: منحنى العرض S -->
+                <div class="svg-box">
+                    <svg width="310" height="200" viewBox="0 0 310 200">
+                        <line x1="45" y1="15" x2="45" y2="165" class="axis" />
+                        <line x1="45" y1="165" x2="290" y2="165" class="axis" />
+                        <text x="28" y="25" font-weight="bold">P</text>
+                        <text x="292" y="170" font-weight="bold">Q</text>
+                        <text x="32" y="182">0</text>
+
+                        <!-- منحنى العرض S -->
+                        <line x1="65" y1="145" x2="255" y2="25" class="curve" />
+                        <text x="260" y="25" font-weight="bold">S</text>
+
+                        <!-- 200 -> 600 -->
+                        <line x1="45" y1="130" x2="90" y2="130" class="dashed" />
+                        <line x1="90" y1="130" x2="90" y2="165" class="dashed" />
+                        <text x="15" y="134">200</text><text x="78" y="182">600</text>
+
+                        <!-- 300 -> 1000 -->
+                        <line x1="45" y1="102" x2="135" y2="102" class="dashed" />
+                        <line x1="135" y1="102" x2="135" y2="165" class="dashed" />
+                        <text x="15" y="106">300</text><text x="120" y="182">1000</text>
+
+                        <!-- 400 -> 1300 -->
+                        <line x1="45" y1="73" x2="180" y2="73" class="dashed" />
+                        <line x1="180" y1="73" x2="180" y2="165" class="dashed" />
+                        <text x="15" y="77">400</text><text x="165" y="182">1300</text>
+
+                        <!-- 500 -> 1700 -->
+                        <line x1="45" y1="45" x2="225" y2="45" class="dashed" />
+                        <line x1="225" y1="45" x2="225" y2="165" class="dashed" />
+                        <text x="15" y="49">500</text><text x="210" y="182">1700</text>
+                    </svg>
+                    <div class="svg-caption">شكل (1) منحنى العرض<span class="cite">[span_44](start_span)[span_44](end_span)</span></div>
+                </div>
+
+                <p>السعر هو <span class="mem" onclick="peek(this)">المتغير المستقل</span> والكمية هي <span class="mem" onclick="peek(this)">المتغير التابع</span>، وباتجاه طردي، ويعبَّر عنها بالدالة:<span class="cite">[span_42](start_span)[span_42](end_span)[span_45](start_span)[span_45](end_span)</span></p>
+
+                <div class="math-container">
+                    <div class="math-row">
+                        <span class="mem" onclick="peek(this)">Qs = f(p)</span>
+                    </div>
+                </div>
+
+                <p>أي أن الكمية المعروضة (Qs) دالة تابعة (f) للتغير في سعر السلعة (p).<span class="cite">[span_46](start_span)[span_46](end_span)</span></p>
+            </div>
+
+            <!-- سبب العلاقة الطردية + النقطتان -->
+            <div class="bento-card" onclick="focusCard(this)">
+                <div class="card-header">
+                    <h2 class="card-title">لماذا العلاقة طردية؟ ونقطتان مهمتان</h2>
+                    <span class="check-pill" onclick="toggleDone(event, this)">✔ فهمتها</span>
+                </div>
+                <p>
+                    <strong>سببا العلاقة الطردية:</strong><br>
+                    1) <strong><span class="mem" onclick="peek(this)">تعظيم الأرباح</span>:</strong> ارتفاع السعر يزيد الربحية، فيحوّل المنتجون المصادر من سلع أقل ربحاً إلى سلع أكثر ربحاً.<span class="cite">[span_37](start_span)[span_37](end_span)[span_38](start_span)[span_38](end_span)</span><br>
+                    2) <strong><span class="mem" onclick="peek(this)">تكلفة الإنتاج</span>:</strong> زيادة الإنتاج تتطلب سحب مصادر من سلع أخرى بمكافآت <span class="mem" onclick="peek(this)">أعلى</span> وكفاءة <span class="mem" onclick="peek(this)">أقل</span>، فيرتفع متوسط التكلفة <span class="mem" onclick="peek(this)">باضطراد</span>، الأمر الذي يستلزم زيادة السعر.<span class="cite">[span_48](start_span)[span_48](end_span)[span_49](start_span)[span_49](end_span)[span_50](start_span)[span_50](end_span)[span_51](start_span)[span_51](end_span)[span_52](start_span)[span_52](end_span)</span>
+                </p>
+
+                <div class="note-box">
+                    <strong>نقطتان يجب الانتباه لهما:</strong><span class="cite">[span_39](start_span)[span_39](end_span)</span><br>
+                    <strong>1- <span class="mem" onclick="peek(this)">تثبيت العوامل الأخرى</span>:</strong> جدول العرض يفترض أن الكمية تتأثر فقط بسعر السلعة نفسها، ونثبّت بقية العوامل لنركز على هذه العلاقة.<span class="cite">[span_40](start_span)[span_40](end_span)</span><br>
+                    <strong>2- <span class="mem" onclick="peek(this)">عنصر الزمن</span>:</strong> كل كمية في الجدول مرتبطة بسعر معين وبـ<span class="mem" onclick="peek(this)">فترة زمنية محددة</span> أيضاً.<span class="cite">[span_41](start_span)[span_41](end_span)</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== القسم 4: الملخص والاختبار ==================== -->
+        <div id="sec-summary" class="page-section">
+            
+            <div class="bento-card" onclick="focusCard(this)">
+                <div class="card-header">
+                    <h2 class="card-title">📌 الزبدة والملخص المركز للامتحان</h2>
+                    <span class="check-pill" onclick="toggleDone(event, this)">✔ جاهز</span>
+                </div>
+                <ul>
+                    <li><strong>مرونة القوس:</strong> تقيس المرونة بين نقطتين للتغيرات الكبيرة، وقيمتها <strong>تتغير</strong> إذا انعكس اتجاه تحرك السعر (من j إلى k = -1.49، ومن k إلى j = 0.43).<span class="cite">[span_53](start_span)[span_53](end_span)[span_54](start_span)[span_54](end_span)</span></li>
+                    <li><strong>مرونة النقطة:</strong> بديل للقوس للتغيرات متناهية الصغر، تستخدم المشتقة (∂Q/∂P)، وهندسياً تساوي <strong>(الجزء الأيمن ÷ الجزء الأيسر)</strong>.<span class="cite">[span_55](start_span)[span_55](end_span)[span_56](start_span)[span_56](end_span)</span></li>
+                    <li><strong>قيم مرونة النقطة على الخط المستقيم:</strong> في الأسفل M (0)، أسفل المنتصف L (&lt;1)، في المنتصف B (=1)، أعلى المنتصف P (&gt;1)، في الأعلى D (∞).<span class="cite">[span_57](start_span)[span_57](end_span)[span_58](start_span)[span_58](end_span)</span></li>
+                    <li><strong>المنحنى غير الخطي:</strong> نقيس مرونة النقطة عليه برسم <strong>خط مماس (MN)</strong> يمس المنحنى في تلك النقطة (Ep = PN/PM = QN/0Q).<span class="cite">[span_59](start_span)[span_59](end_span)</span></li>
+                    <li><strong>نظرية العرض:</strong> علاقة موجبة (طردية) حيث السعر متغير مستقل والكمية متغير تابع <code>Qs = f(p)</code>، مع شرط تثبيت العوامل الأخرى وتحديد الفترة الزمنية.<span class="cite">[span_60](start_span)[span_60](end_span)[span_61](start_span)[span_61](end_span)</span></li>
+                    <li><strong>سببا العلاقة الطردية للعرض:</strong> 1) السعي لتعظيم الأرباح، 2) الارتفاع المضطرد في متوسط تكلفة الإنتاج بسبب سحب عناصر إنتاج بمكافآت أعلى وكفاءة أقل.<span class="cite">[span_62](start_span)[span_62](end_span)[span_63](start_span)[span_63](end_span)</span></li>
+                </ul>
+            </div>
+
+            <!-- اختبار تفاعلي سريع لتثبيت الحفظ -->
+            <div class="bento-card" onclick="focusCard(this)">
+                <div class="card-header">
+                    <h2 class="card-title">⚡ اختبر نفسك قبل الامتحان (اضغط على الإجابة)</h2>
+                </div>
+
+                <p><strong>1. عند عكس اتجاه التغير في السعر بين نفس النقطتين، فإن معامل مرونة القوس:</strong></p>
+                <button class="quiz-option" onclick="checkQuiz(this, false)">يبقى ثابتاً لا يتغير</button>
+                <button class="quiz-option" onclick="checkQuiz(this, true)">يتغير وينطوي على معامل مرونة مختلف</button>
+
+                <p style="margin-top: 18px;"><strong>2. هندسياً، المرونة السعرية لنقطة معينة على خط الطلب تساوي:</strong></p>
+                <button class="quiz-option" onclick="checkQuiz(this, true)">نسبة الجزء الأيمن إلى الجزء الأيسر</button>
+                <button class="quiz-option" onclick="checkQuiz(this, false)">نسبة الجزء الأيسر إلى الجزء الأيمن</button>
+
+                <p style="margin-top: 18px;"><strong>3. في معادلة العرض Qs = f(p)، يمثل السعر (p):</strong></p>
+                <button class="quiz-option" onclick="checkQuiz(this, false)">المتغير التابع</button>
+                <button class="quiz-option" onclick="checkQuiz(this, true)">المتغير المستقل</button>
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- الشريط السفلي العائم للتنقل -->
+    <div class="bottom-nav">
+        <button class="nav-item active" onclick="switchSection('sec-arc', this)">1. القوس</button>
+        <button class="nav-item" onclick="switchSection('sec-point', this)">2. النقطة</button>
+        <button class="nav-item" onclick="switchSection('sec-supply', this)">3. العرض</button>
+        <button class="nav-item" onclick="switchSection('sec-summary', this)">4. الملخص</button>
+    </div>
+
+    <script>
+        // التنقل بين الأقسام الأربعة
+        function switchSection(secId, btn) {
+            document.querySelectorAll('.page-section').forEach(sec => sec.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+            
+            document.getElementById(secId).classList.add('active');
+            btn.classList.add('active');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // تغيير طور الدراسة (قراءة / تسميع / تركيز)
+        function setMode(mode, btn) {
+            document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+
+            document.body.classList.remove('recall-mode', 'spotlight-mode');
+            document.querySelectorAll('.mem').forEach(m => m.classList.remove('peek'));
+
+            if (mode === 'recall') {
+                document.body.classList.add('recall-mode');
+            } else if (mode === 'spotlight') {
+                document.body.classList.add('spotlight-mode');
+            }
+        }
+
+        // كشف الكلمة المخفية في طور التسميع
+        function peek(el) {
+            if (document.body.classList.contains('recall-mode')) {
+                el.classList.toggle('peek');
+            }
+        }
+
+        // تفعيل البطاقة في طور التركيز
+        function focusCard(card) {
+            if (document.body.classList.contains('spotlight-mode')) {
+                document.querySelectorAll('.bento-card').forEach(c => c.classList.remove('focused'));
+                card.classList.add('focused');
+            }
+        }
+
+        // تأشير البطاقة كـ "تم فهمها"
+        function toggleDone(e, pill) {
+            e.stopPropagation();
+            const card = pill.closest('.bento-card');
+            card.classList.toggle('read-done');
+        }
+
+        // التحقق من إجابات الاختبار السريع
+        function checkQuiz(btn, isCorrect) {
+            if (isCorrect) {
+                btn.classList.add('correct');
+                btn.innerText += " ✔ (إجابة صحيحة!)";
+            } else {
+                btn.classList.add('wrong');
+                btn.innerText += " ✖ (حاول مرة أخرى)";
+            }
+        }
+    </script>
+</body>
+</html>
