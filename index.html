@@ -2,990 +2,892 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>الاقتصاد</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>المبسط الشامل في الاقتصاد - النسخة المطورة</title>
     <style>
-        /* لوحة ألوان مريحة جداً للعين (Emerald & Deep Slate) */
+        @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap');
+
         :root {
-            --bg-main: #0b0f17;
-            --bg-card: #151c28;
-            --bg-sub: #1c2536;
-            --emerald: #10b981;
-            --emerald-soft: rgba(16, 185, 129, 0.15);
-            --amber: #f59e0b;
-            --amber-soft: rgba(245, 158, 11, 0.12);
-            --sky: #38bdf8;
-            --rose: #f43f5e;
-            --text-primary: #f1f5f9;
-            --text-secondary: #94a3b8;
-            --border: #263147;
+            --bg: #f1f5f9;
+            --card-bg: #ffffff;
+            --text-main: #0f172a;
+            --text-sec: #334155;
+            --primary: #2563eb;
+            --primary-light: #dbeafe;
+            --street: #059669;
+            --street-light: #d1fae5;
+            --warn: #d97706;
+            --warn-light: #fef3c7;
+            --purple: #7c3aed;
+            --purple-light: #ede9fe;
+            --border: #e2e8f0;
+            --box-bg: #f8fafc;
         }
 
-        * {
-            box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
+        body.dark-mode {
+            --bg: #0f172a;
+            --card-bg: #1e293b;
+            --text-main: #f8fafc;
+            --text-sec: #cbd5e1;
+            --primary: #3b82f6;
+            --primary-light: #1e3a8a;
+            --street: #10b981;
+            --street-light: #064e3b;
+            --warn: #f59e0b;
+            --warn-light: #78350f;
+            --purple: #8b5cf6;
+            --purple-light: #4c1d95;
+            --border: #334155;
+            --box-bg: #0f172a;
         }
+
+        * { box-sizing: border-box; }
 
         body {
-            font-family: 'Segoe UI', Tahoma, system-ui, -apple-system, sans-serif;
-            background-color: var(--bg-main);
-            color: var(--text-primary);
+            font-family: 'Tajawal', sans-serif;
+            background-color: var(--bg);
+            color: var(--text-main);
             margin: 0;
-            padding: 65px 12px 90px 12px; /* مساحة للهيدر العلوي والشريط السفلي */
-            line-height: 1.85;
-            font-size: 16px;
+            padding: 15px;
+            transition: background-color 0.3s, color 0.3s;
         }
 
         .container {
-            max-width: 820px;
+            max-width: 850px;
             margin: 0 auto;
         }
 
-        /* الشريط العلوي المدمج (اسم المادة + أطوار الحفظ) */
+        /* Top Bar & Progress - تم التعديل هنا فقط لجعله صغير ومدمج */
         .top-bar {
-            position: fixed;
-            top: 0; left: 0; right: 0;
-            height: 56px;
-            background: rgba(11, 15, 23, 0.92);
-            backdrop-filter: blur(12px);
-            border-bottom: 1px solid var(--border);
+            background: var(--card-bg);
+            padding: 10px 12px; /* تقليل الحشوة */
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            margin-bottom: 15px;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+            position: sticky;
+            top: 5px;
+            z-index: 100;
+        }
+
+        .header-row {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 0 16px;
-            z-index: 1000;
+            margin-bottom: 8px;
         }
 
-        .brand {
-            font-size: 1.35em;
-            font-weight: 800;
-            color: var(--emerald);
-            letter-spacing: 0.5px;
-        }
-
-        .mode-switcher {
-            display: flex;
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 3px;
-            gap: 4px;
-        }
-
-        .mode-btn {
-            background: transparent;
-            border: none;
-            color: var(--text-secondary);
-            padding: 5px 10px;
-            border-radius: 6px;
-            font-size: 0.85em;
-            font-weight: bold;
-            cursor: pointer;
-            transition: 0.2s;
-        }
-
-        .mode-btn.active {
-            background: var(--emerald);
-            color: #000;
-        }
-
-        /* الأقسام (الصفحات) */
-        .page-section {
-            display: none;
-            animation: fadeSlide 0.3s ease-out;
-        }
-
-        .page-section.active {
-            display: block;
-        }
-
-        @keyframes fadeSlide {
-            from { opacity: 0; transform: translateY(8px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        /* بطاقات Bento للدراسة */
-        .bento-card {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 14px;
-            padding: 18px;
-            margin-bottom: 16px;
-            transition: opacity 0.3s, border-color 0.3s, transform 0.2s;
-            position: relative;
-        }
-
-        /* ميزة طور التركيز (Spotlight Mode) */
-        body.spotlight-mode .bento-card {
-            opacity: 0.25;
-            filter: blur(1px);
-        }
-
-        body.spotlight-mode .bento-card.focused,
-        body.spotlight-mode .bento-card:hover {
-            opacity: 1;
-            filter: none;
-            border-color: var(--emerald);
-            box-shadow: 0 8px 25px rgba(0,0,0,0.6);
-        }
-
-        /* مؤشر إتمام قراءة البطاقة */
-        .card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid var(--border);
-            padding-bottom: 10px;
-            margin-bottom: 14px;
-        }
-
-        .card-title {
+        .header-row h1 {
             margin: 0;
-            font-size: 1.15em;
-            color: var(--emerald);
+            font-size: 1.1rem; /* تصغير الخط */
+            color: var(--primary);
+            white-space: nowrap;
+        }
+
+        .top-actions {
+            display: flex;
+            gap: 5px;
+        }
+
+        .top-actions button {
+            padding: 4px 8px; /* تصغير أزرار الوضع الليلي والتصفير */
+            font-size: 0.75rem;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            background: var(--box-bg);
+            color: var(--text-sec);
+            cursor: pointer;
+            font-family: inherit;
             font-weight: 700;
         }
 
-        .check-pill {
-            background: var(--bg-sub);
+        .progress-wrapper {
+            background: var(--border);
+            height: 6px; /* تصغير سمك شريط التقدم */
+            border-radius: 99px;
+            overflow: hidden;
+            margin-bottom: 5px;
+        }
+
+        .progress-bar {
+            background: linear-gradient(90deg, var(--primary), var(--street));
+            height: 100%;
+            width: 0%;
+            transition: width 0.4s ease;
+        }
+
+        .progress-text {
+            font-size: 0.75rem; /* تصغير النص */
+            color: var(--text-sec);
+            display: flex;
+            justify-content: space-between;
+            font-weight: 700;
+        }
+
+        /* Filter Tabs */
+        .filter-bar {
+            display: flex;
+            gap: 5px;
+            margin-top: 8px;
+        }
+
+        .filter-btn {
+            flex: 1;
+            padding: 5px; /* تصغير أزرار الفلترة */
+            font-size: 0.8rem;
+            border-radius: 6px;
             border: 1px solid var(--border);
-            color: var(--text-secondary);
-            padding: 3px 10px;
+            background: var(--box-bg);
+            color: var(--text-sec);
+            cursor: pointer;
+            font-family: inherit;
+            font-weight: 700;
+        }
+
+        .filter-btn.active {
+            background: var(--primary);
+            color: #fff;
+            border-color: var(--primary);
+        }
+
+        /* Cards - بقية الكود كما هو بدون أي تغيير */
+        .card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            border: 2px solid var(--border);
+            padding: 22px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.04);
+            transition: transform 0.2s, border-color 0.3s;
+        }
+
+        .card.mastered {
+            border-color: var(--street);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 10px;
+            border-bottom: 2px solid var(--border);
+            padding-bottom: 12px;
+            margin-bottom: 15px;
+        }
+
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: var(--text-main);
+            margin: 0;
+        }
+
+        .badge {
+            font-size: 0.8rem;
+            padding: 4px 10px;
             border-radius: 20px;
-            font-size: 0.8em;
-            cursor: pointer;
-            user-select: none;
-            transition: 0.2s;
+            background: var(--primary-light);
+            color: var(--primary);
+            font-weight: 700;
+            white-space: nowrap;
         }
 
-        .bento-card.read-done {
-            border-right: 4px solid var(--emerald);
-        }
-
-        .bento-card.read-done .check-pill {
-            background: var(--emerald-soft);
-            color: var(--emerald);
-            border-color: var(--emerald);
-        }
-
-        /* الكلمات التفاعلية للحفظ (Memory Keywords) */
-        .mem {
-            color: var(--sky);
-            font-weight: bold;
-            background: rgba(56, 189, 248, 0.1);
-            padding: 1px 6px;
-            border-radius: 5px;
-            border-bottom: 1px dashed var(--sky);
-            cursor: pointer;
-            transition: 0.25s;
-            display: inline-block;
-        }
-
-        /* عند تفعيل طور التسميع */
-        body.recall-mode .mem:not(.peek) {
-            background: var(--bg-sub);
-            color: transparent;
-            border-bottom: 2px solid var(--amber);
-            user-select: none;
-            min-width: 45px;
-            text-align: center;
-        }
-
-        body.recall-mode .mem:not(.peek)::after {
-            content: "؟";
-            color: var(--amber);
-            font-size: 0.9em;
-        }
-
-        /* تنسيق المعادلات الرياضية النقية (Pure HTML/CSS) */
-        .math-container {
-            background: #0d131d;
+        .content-box {
+            background: var(--box-bg);
+            border-radius: 12px;
+            padding: 18px;
+            margin-bottom: 16px;
+            line-height: 1.9;
+            font-size: 1.05rem;
+            color: var(--text-sec);
             border: 1px solid var(--border);
-            border-right: 3px solid var(--sky);
-            border-radius: 10px;
-            padding: 14px;
-            margin: 12px 0;
+            transition: opacity 0.3s, filter 0.3s;
+        }
+
+        .content-box.blurred {
+            filter: blur(8px);
+            user-select: none;
+            pointer-events: none;
+        }
+
+        .academic-view ul {
+            margin: 0;
+            padding-right: 20px;
+        }
+
+        .academic-view li {
+            margin-bottom: 10px;
+        }
+
+        .street-view {
+            display: none;
+            background: var(--street-light);
+            color: var(--text-main);
+            padding: 15px;
+            border-radius: 8px;
+            border-right: 4px solid var(--street);
+            font-weight: 500;
+        }
+
+        .graph-view {
+            display: none;
+            text-align: center;
+            padding: 15px;
+            background: #ffffff;
+            color: #000;
+            border-radius: 8px;
+            margin-top: 12px;
+            border: 1px solid var(--border);
+        }
+
+        .kw {
+            font-weight: 700;
+            color: var(--primary);
+            padding: 0 3px;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+
+        .cloze-active .kw {
+            background-color: var(--warn);
+            color: transparent;
+            cursor: pointer;
+            user-select: none;
+            padding: 2px 10px;
+            border-radius: 6px;
+            position: relative;
+        }
+
+        .cloze-active .kw::after {
+            content: "؟";
+            color: #fff;
+            font-size: 0.9rem;
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .cloze-active .kw.revealed {
+            background-color: var(--street-light);
+            color: var(--street);
+        }
+
+        .cloze-active .kw.revealed::after {
+            content: "";
+        }
+
+        .math-block {
+            background: var(--card-bg);
+            padding: 10px 15px;
+            border-radius: 8px;
+            border: 1px dashed var(--primary);
+            margin: 10px 0;
+            direction: ltr;
+            text-align: center;
+            font-weight: 700;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 1.05rem;
+            color: var(--text-main);
             overflow-x: auto;
         }
 
-        .math-row {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            direction: ltr;
-            font-size: 1.15em;
-            font-weight: bold;
-            color: var(--text-primary);
-            flex-wrap: wrap;
-        }
-
         .frac {
-            display: inline-flex;
-            flex-direction: column;
-            align-items: center;
+            display: inline-block;
             vertical-align: middle;
             text-align: center;
-            padding: 0 4px;
-        }
-
-        .num {
-            border-bottom: 2px solid var(--sky);
-            padding: 0 6px 2px;
-            color: var(--sky);
-        }
-
-        .den {
-            padding: 2px 6px 0;
-            color: var(--emerald);
-        }
-
-        .arrow {
-            color: var(--amber);
-            font-weight: bold;
             margin: 0 4px;
         }
+        .frac > sup {
+            display: block;
+            border-bottom: 1.5px solid currentColor;
+            padding: 0 4px;
+            font-size: 0.9em;
+        }
+        .frac > sub {
+            display: block;
+            padding: 0 4px;
+            font-size: 0.9em;
+        }
 
-        /* الجداول */
-        table {
+        table.eco-table {
             width: 100%;
             border-collapse: collapse;
             margin: 12px 0;
-            background: #0d131d;
-            border-radius: 10px;
-            overflow: hidden;
-            font-size: 0.95em;
-        }
-
-        th, td {
-            padding: 10px;
+            font-size: 0.95rem;
             text-align: center;
+            background: var(--card-bg);
+        }
+
+        table.eco-table th, table.eco-table td {
             border: 1px solid var(--border);
+            padding: 8px;
         }
 
-        th {
-            background: var(--bg-sub);
-            color: var(--emerald);
+        table.eco-table th {
+            background: var(--primary-light);
+            color: var(--primary);
         }
 
-        /* الرسوم البيانية (SVG) */
-        .svg-box {
-            background: #0d131d;
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 15px 10px;
-            margin: 14px 0;
-            text-align: center;
-        }
-
-        .svg-caption {
-            font-size: 0.85em;
-            color: var(--text-secondary);
-            margin-top: 8px;
-        }
-
-        svg {
-            max-width: 100%;
-            height: auto;
-        }
-
-        .axis { stroke: #64748b; stroke-width: 2; }
-        .curve { stroke: var(--emerald); stroke-width: 3; fill: none; }
-        .dashed { stroke: #475569; stroke-width: 1.5; stroke-dasharray: 4,4; }
-        .point { fill: var(--amber); cursor: pointer; transition: r 0.2s; }
-        .point:hover { r: 7; }
-        svg text { fill: var(--text-primary); font-family: sans-serif; font-size: 13px; }
-
-        /* الصناديق التنبيهية */
-        .note-box {
-            background: var(--amber-soft);
-            border-right: 4px solid var(--amber);
-            padding: 14px;
-            border-radius: 8px;
-            margin: 12px 0;
-            font-size: 0.95em;
-        }
-
-        /* الشريط السفلي العائم للتنقل السريع */
-        .bottom-nav {
-            position: fixed;
-            bottom: 12px;
-            left: 12px;
-            right: 12px;
-            max-width: 550px;
-            margin: 0 auto;
-            background: rgba(21, 28, 40, 0.95);
-            backdrop-filter: blur(15px);
-            border: 1px solid var(--border);
-            border-radius: 16px;
+        .controls {
             display: flex;
-            justify-content: space-around;
-            padding: 8px 6px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
-            z-index: 1000;
+            flex-wrap: wrap;
+            gap: 8px;
         }
 
-        .nav-item {
-            background: transparent;
-            border: none;
-            color: var(--text-secondary);
-            font-size: 0.85em;
-            font-weight: bold;
-            padding: 8px 12px;
-            border-radius: 10px;
-            cursor: pointer;
-            transition: 0.2s;
+        button.ctrl-btn {
             flex: 1;
-            text-align: center;
-        }
-
-        .nav-item.active {
-            background: var(--emerald-soft);
-            color: var(--emerald);
-            border: 1px solid rgba(16, 185, 129, 0.3);
-        }
-
-        /* تصميم الاختبار التفاعلي (Quiz) */
-        .quiz-option {
-            display: block;
-            width: 100%;
-            text-align: right;
-            background: var(--bg-sub);
-            border: 1px solid var(--border);
-            color: var(--text-primary);
-            padding: 12px 15px;
-            margin-top: 8px;
+            min-width: 110px;
+            padding: 9px 12px;
+            border: none;
             border-radius: 8px;
+            font-family: inherit;
+            font-weight: 700;
+            font-size: 0.9rem;
             cursor: pointer;
-            font-size: 0.95em;
-            transition: 0.2s;
+            transition: opacity 0.2s, transform 0.1s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
         }
 
-        .quiz-option.correct {
-            background: rgba(16, 185, 129, 0.2);
-            border-color: var(--emerald);
-            color: var(--emerald);
-            font-weight: bold;
-        }
+        button.ctrl-btn:active { transform: scale(0.97); }
 
-        .quiz-option.wrong {
-            background: rgba(244, 63, 94, 0.2);
-            border-color: var(--rose);
-            color: var(--rose);
-        }
+        .btn-acad { background: var(--primary); color: #fff; }
+        .btn-str { background: var(--street); color: #fff; }
+        .btn-cloze { background: var(--warn); color: #fff; }
+        .btn-graph { background: var(--purple); color: #fff; }
+        .btn-hide { background: var(--border); color: var(--text-main); }
+        .btn-done { background: transparent; border: 2px solid var(--street) !important; color: var(--street); }
+        .card.mastered .btn-done { background: var(--street); color: #fff; }
 
-        /* إخفاء المصادر برمجياً */
-        .cite { display: none !important; }
+        svg { max-width: 100%; height: auto; }
     </style>
 </head>
 <body>
 
-    <!-- الشريط العلوي المدمج -->
+<div class="container">
+    <!-- Top Sticky Bar -->
     <div class="top-bar">
-        <div class="brand">الاقتصاد</div>
-        <div class="mode-switcher">
-            <button class="mode-btn active" onclick="setMode('read', this)">📖 قراءة</button>
-            <button class="mode-btn" onclick="setMode('recall', this)">🧠 تسميع</button>
-            <button class="mode-btn" onclick="setMode('spotlight', this)">🎯 تركيز</button>
+        <div class="header-row">
+            <h1>🧠 المبسط الشامل في الاقتصاد</h1>
+            <div class="top-actions">
+                <button onclick="toggleDarkMode()">🌙 ليلي</button>
+                <button onclick="resetProgress()">🔄 تصفير</button>
+            </div>
+        </div>
+        <div class="progress-wrapper">
+            <div class="progress-bar" id="progressBar"></div>
+        </div>
+        <div class="progress-text">
+            <span>نسبة إتقان المادة (درخ وفهم):</span>
+            <span id="progressCount">0 / 7 بطاقات (0%)</span>
+        </div>
+        <div class="filter-bar">
+            <button class="filter-btn active" onclick="filterCards('all', this)">الكل (7)</button>
+            <button class="filter-btn" onclick="filterCards('unmastered', this)">غير محفوظة</button>
+            <button class="filter-btn" onclick="filterCards('mastered', this)">تم حفظها ✅</button>
         </div>
     </div>
 
-    <div class="container">
-
-        <!-- ==================== القسم 1: مرونة القوس ==================== -->
-        <div id="sec-arc" class="page-section active">
-            
-            <div class="bento-card" onclick="focusCard(this)">
-                <div class="card-header">
-                    <h2 class="card-title">ثامناً: مرونة القوس (Arc Elasticity)</h2>
-                    <span class="check-pill" onclick="toggleDone(event, this)">✔ فهمتها</span>
-                </div>
-                <p>
-                    تمثل مرونة القوس قياس المرونة بين <span class="mem" onclick="peek(this)">نقطتين محددتين</span> على منحنى طلب معين وتستخدم للتغيرات <span class="mem" onclick="peek(this)">الكبيرة</span>.<span class="cite">[span_9](start_span)[span_9](end_span)</span>
-                    على سبيل المثال فإن قياس المرونة بين النقطتين (j) و (k) في الشكل أدناه، هو مرونة القوس.<span class="cite">[span_10](start_span)[span_10](end_span)</span>
-                </p>
-
-                <!-- الرسم البياني 1: مرونة القوس -->
-                <div class="svg-box">
-                    <svg width="300" height="200" viewBox="0 0 300 200">
-                        <line x1="45" y1="15" x2="45" y2="165" class="axis" />
-                        <line x1="45" y1="165" x2="280" y2="165" class="axis" />
-                        <text x="28" y="25" font-weight="bold">P</text>
-                        <text x="285" y="170" font-weight="bold">Q</text>
-                        <text x="30" y="182">0</text>
-                        
-                        <line x1="65" y1="45" x2="245" y2="155" class="curve" />
-                        <text x="255" y="150" font-weight="bold">D</text>
-
-                        <!-- النقطة j -->
-                        <line x1="45" y1="78" x2="120" y2="78" class="dashed" />
-                        <line x1="120" y1="78" x2="120" y2="165" class="dashed" />
-                        <circle cx="120" cy="78" r="5" class="point" />
-                        <text x="125" y="68" font-weight="bold">j</text>
-                        <text x="20" y="83">20</text>
-                        <text x="112" y="185">43</text>
-
-                        <!-- النقطة k -->
-                        <line x1="45" y1="130" x2="205" y2="130" class="dashed" />
-                        <line x1="205" y1="130" x2="205" y2="165" class="dashed" />
-                        <circle cx="205" cy="130" r="5" class="point" />
-                        <text x="212" y="120" font-weight="bold">k</text>
-                        <text x="20" y="135">10</text>
-                        <text x="197" y="185">75</text>
-                    </svg>
-                    <div class="svg-caption">مثال: احسب 1- مرونة القوس من (j) إلى (k) | 2- مرونة القوس من (k) إلى (j)<span class="cite">[span_11](start_span)[span_11](end_span)</span></div>
-                </div>
-            </div>
-
-            <!-- حل الفرع الأول -->
-            <div class="bento-card" onclick="focusCard(this)">
-                <div class="card-header">
-                    <h2 class="card-title">1) احتساب المرونة من (j) إلى (k)</h2>
-                    <span class="check-pill" onclick="toggleDone(event, this)">✔ فهمتها</span>
-                </div>
-                
-                <p>الجواب: يمكن احتساب المرونة بين النقطتين بالصيغة التالية:<span class="cite">[span_12](start_span)[span_12](end_span)</span></p>
-                
-                <div class="math-container">
-                    <div class="math-row">
-                        <span>Ed =</span>
-                        <div class="frac"><span class="num">%ΔQd</span><span class="den">%ΔP</span></div>
-                        <span class="arrow">⇒</span>
-                        <div class="frac"><span class="num">ΔQd</span><span class="den">ΔP</span></div>
-                        <span>×</span>
-                        <div class="frac"><span class="num">P</span><span class="den">Qd</span></div>
-                    </div>
-                </div>
-
-                <table>
-                    <tr><th>التغير</th><th>P</th><th>Q</th></tr>
-                    <tr><td>1</td><td>20</td><td>43</td></tr>
-                    <tr><td>2</td><td>10</td><td>75</td></tr>
-                </table>
-
-                <div class="math-container">
-                    <div class="math-row">
-                        <span>Ed =</span>
-                        <div class="frac"><span class="num">Q2 - Q1</span><span class="den">P2 - P1</span></div>
-                        <span>×</span>
-                        <div class="frac"><span class="num">P1</span><span class="den">Q1</span></div>
-                        <span class="arrow">⇒</span>
-                        <div class="frac"><span class="num">75 - 43</span><span class="den">10 - 20</span></div>
-                        <span>×</span>
-                        <div class="frac"><span class="num">20</span><span class="den">43</span></div>
-                        <span class="arrow">→</span>
-                        <div class="frac"><span class="num">32</span><span class="den">-10</span></div>
-                        <span>×</span>
-                        <div class="frac"><span class="num">20</span><span class="den">43</span></div>
-                        <span class="arrow">→</span>
-                        <div class="frac"><span class="num">640</span><span class="den">-430</span></div>
-                        <span>=</span>
-                        <span class="mem" onclick="peek(this)">-1.49</span>
-                    </div>
-                </div>
-
-                <p>
-                    <strong>التعليق:</strong> بمعنى أن انخفاضاً قدره (1%) في سعر السلعة (x) ينجم عنه <span class="mem" onclick="peek(this)">زيادة مقدارها (1.49%)</span> في الطلب على السلعة.<span class="cite">[span_13](start_span)[span_13](end_span)</span>
-                </p>
-            </div>
-
-            <!-- تنبيه متخذ القرار وحل الفرع الثاني -->
-            <div class="bento-card" onclick="focusCard(this)">
-                <div class="card-header">
-                    <h2 class="card-title">2) التحرك المقلوب من (k) إلى (j) وتحذير القرار</h2>
-                    <span class="check-pill" onclick="toggleDone(event, this)">✔ فهمتها</span>
-                </div>
-
-                <div class="note-box">
-                    إن استخدام مرونة القوس يستلزم <span class="mem" onclick="peek(this)">عناية كبيرة</span> من جانب متخذ القرار، لأنها قد تنطوي على احتمال الوقوع في الخطأ.<span class="cite">[span_14](start_span)[span_14](end_span)</span> حيث <span class="mem" onclick="peek(this)">يختلف</span> معامل مرونة القوس بين نفس النقطتين على منحنى الطلب، إذا <span class="mem" onclick="peek(this)">انقلب اتجاه التغير</span> في سعر السلعة.<span class="cite">[span_15](start_span)[span_15](end_span)</span> فإذا كانت مرونة القوس تساوي (1.49%) عند التحرك من النقطة (j) إلى النقطة (K)؛ فإن هذه المرونة لا تظل كما هي، بل تتغير عند التحرك من النقطة (K) إلى النقطة (j). إن التحرك المقلوب في سعر السلعة ينطوي على معامل مرونة مختلف.<span class="cite">[span_16](start_span)[span_16](end_span)</span>
-                </div>
-
-                <table>
-                    <tr><th>التغير</th><th>P</th><th>Q</th></tr>
-                    <tr><td>1</td><td>10</td><td>75</td></tr>
-                    <tr><td>2</td><td>20</td><td>43</td></tr>
-                </table>
-
-                <div class="math-container">
-                    <div class="math-row">
-                        <span>Ed =</span>
-                        <div class="frac"><span class="num">Q2 - Q1</span><span class="den">P2 - P1</span></div>
-                        <span>×</span>
-                        <div class="frac"><span class="num">P1</span><span class="den">Q1</span></div>
-                        <span class="arrow">→</span>
-                        <div class="frac"><span class="num">43 - 75</span><span class="den">20 - 10</span></div>
-                        <span>×</span>
-                        <div class="frac"><span class="num">10</span><span class="den">75</span></div>
-                        <span class="arrow">→</span>
-                        <div class="frac"><span class="num">-32</span><span class="den">10</span></div>
-                        <span>×</span>
-                        <div class="frac"><span class="num">10</span><span class="den">75</span></div>
-                        <span class="arrow">→</span>
-                        <div class="frac"><span class="num">320</span><span class="den">750</span></div>
-                        <span>=</span>
-                        <span class="mem" onclick="peek(this)">0.43</span>
-                    </div>
-                </div>
-
-                <p>
-                    <strong>التعليق:</strong> بمعنى أن ارتفاع قدره (1%) في سعر السلعة (x) ينجم عنه <span class="mem" onclick="peek(this)">انخفاض مقدارها (0.43%)</span> في الطلب على السلعة.<span class="cite">[span_17](start_span)[span_17](end_span)</span>
-                </p>
-                <p>
-                    حيث يظهر أمامنا أن مقياس معامل المرونة يختلف عندما يكون إتجاه تحرك سعر السلعة مقلوباً. أي أن معامل مرونة القوس يعتمد أيضاً على <span class="mem" onclick="peek(this)">اتجاه التغير</span> في سعر السلعة.<span class="cite">[span_18](start_span)[span_18](end_span)</span>
-                </p>
-            </div>
+    <!-- CARD 1: مرونة القوس (التعريف والمسائل) -->
+    <div class="card" id="card1" data-id="1">
+        <div class="card-header">
+            <h2 class="card-title">1. ثامناً: مرونة القوس (التعريف والمسائل)</h2>
+            <span class="badge">الفصل الأول</span>
         </div>
-
-        <!-- ==================== القسم 2: مرونة النقطة ==================== -->
-        <div id="sec-point" class="page-section">
-            
-            <div class="bento-card" onclick="focusCard(this)">
-                <div class="card-header">
-                    <h2 class="card-title">تاسعاً: مرونة النقطة (Point Elasticity)</h2>
-                    <span class="check-pill" onclick="toggleDone(event, this)">✔ فهمتها</span>
-                </div>
-                <p>
-                    من الطرق الأخرى لتبسيط مشكلة قياس مرونة الطلب، استخدام فكرة مرونة النقطة. ويمكن أن نفترض ابتداءً وجود <span class="mem" onclick="peek(this)">منحنى طلب خطي</span>؛ حيث تكون تركيبة التغير في سعر والكمية المطلوبة <span class="mem" onclick="peek(this)">متناهية في الصغر</span>.<span class="cite">[span_19](start_span)[span_19](end_span)</span>
-                    وهنا فإن طلب النقطة تمثل المرونة في <span class="mem" onclick="peek(this)">نقطة محددة</span> على منحنى طلب خطي أي على خط الطلب مثل مرونة النقطة (P) أو النقطة (B) على منحنى الطلب (DM)، (وهي بديل لفكرة المرونة بين نقطتين التي تمثل مرونة القوس).<span class="cite">[span_20](start_span)[span_20](end_span)</span>
-                </p>
-
-                <!-- الرسم البياني 2: التحرك المتناهي في الصغر على الخط DM -->
-                <div class="svg-box">
-                    <svg width="300" height="200" viewBox="0 0 300 200">
-                        <line x1="45" y1="15" x2="45" y2="165" class="axis" />
-                        <line x1="45" y1="165" x2="280" y2="165" class="axis" />
-                        <text x="15" y="40">السعر</text>
-                        <text x="245" y="185">الكمية</text>
-                        <text x="32" y="180">0</text>
-
-                        <!-- الخط المستقيم DM -->
-                        <line x1="45" y1="35" x2="235" y2="165" class="curve" />
-                        <text x="28" y="42" font-weight="bold">D</text>
-                        <text x="235" y="182" font-weight="bold">M</text>
-
-                        <!-- النقاط P, B, L -->
-                        <circle cx="95" cy="69" r="4" class="point" />
-                        <text x="98" y="62" font-weight="bold">P</text>
-                        <line x1="95" y1="69" x2="95" y2="165" class="dashed" />
-                        <text x="90" y="182">Q</text>
-
-                        <circle cx="145" cy="103" r="4" class="point" />
-                        <text x="148" y="96" font-weight="bold">B</text>
-                        <line x1="145" y1="103" x2="145" y2="165" class="dashed" />
-                        <line x1="95" y1="103" x2="145" y2="103" class="dashed" />
-                        <text x="140" y="182">N</text>
-
-                        <circle cx="190" cy="134" r="4" class="point" />
-                        <text x="195" y="128" font-weight="bold">L</text>
-                        <line x1="190" y1="134" x2="190" y2="165" class="dashed" />
-                        <line x1="145" y1="134" x2="190" y2="134" class="dashed" />
-                    </svg>
-                </div>
-
-                <p>
-                    إن التحرك من النقطة (B) نحو النقطة (P) يتضمن تغيراً في سعر السلعة (ΔP) ولكن بمقدار <span class="mem" onclick="peek(this)">أصغر فأصغر</span> حتى نصل إلى النقطة (P) تقريباً، حيث يصبح التغير في السعر متناهياً في الصغر.<span class="cite">[span_21](start_span)[span_21](end_span)</span>
-                </p>
-            </div>
-
-            <!-- الاشتقاق الرياضي والهندسي الكامل -->
-            <div class="bento-card" onclick="focusCard(this)">
-                <div class="card-header">
-                    <h2 class="card-title">الصيغة الرياضية والاشتقاق الهندسي</h2>
-                    <span class="check-pill" onclick="toggleDone(event, this)">✔ فهمتها</span>
-                </div>
-                <p>
-                    إن قياس مرونة التغير الطفيف في السعر يماثل قياس المرونة في نقطة واحدة (Sin p) وإن صيغة قياس مرونة النقطة تماثل صيغة مرونة القوس. ويمكن التعبير عن مرونة النقطة (ep) بالصيغة التالية:<span class="cite">[span_22](start_span)[span_22](end_span)</span>
-                </p>
-
-                <div class="math-container">
-                    <div class="math-row">
-                        <span>Ep =</span>
-                        <div class="frac"><span class="num">∂Q</span><span class="den">∂P</span></div>
-                        <span>×</span>
-                        <div class="frac"><span class="num">P</span><span class="den">Q</span></div>
-                    </div>
-                </div>
-
-                <p>
-                    حيث تم الاستعاضة عن صيغة (ΔQd / ΔP) بالصيغة (∂Q / ∂P) والتي تمثل <span class="mem" onclick="peek(this)">المشتقة</span> تعبر عن انحدار خط الطلب (DM).<span class="cite">[span_23](start_span)[span_23](end_span)</span>
-                    وهكذا فإن مرونة النقطة إنما تعبر عن نسبة السعر إلى الكمية المطلوبة في نقطة معينة، كما تعبر أيضاً عن درجة انحدار معينة لخط الطلب.<span class="cite">[span_24](start_span)[span_24](end_span)</span>
-                </p>
-                <p>
-                    أن انحدار الخط المستقيم (DM) في النقطة (P)، يعطينا هندسياً <span class="mem" onclick="peek(this)">(QM / PQ)</span> بحيث أن (∂Q / ∂P = QM / PQ).<span class="cite">[span_25](start_span)[span_25](end_span)</span>
-                    حيث نجد أنه في النقطة (P) تصبح <span class="mem" onclick="peek(this)">(P = PQ)</span>، كما أن <span class="mem" onclick="peek(this)">(Q = 0Q)</span>. وبالتعويض نصل إلى:<span class="cite">[span_26](start_span)[span_26](end_span)</span>
-                </p>
-
-                <div class="math-container">
-                    <div class="math-row">
-                        <span>Ep =</span>
-                        <div class="frac"><span class="num">QM</span><span class="den">PQ</span></div>
-                        <span>×</span>
-                        <div class="frac"><span class="num">PQ</span><span class="den">0Q</span></div>
-                        <span class="arrow">⇒</span>
-                        <span>Ep =</span>
-                        <div class="frac"><span class="num">QM</span><span class="den">0Q</span></div>
-                    </div>
-                </div>
-
-                <p>
-                    ومن الناحية الهندسية، يمكن القول أن المرونة السعرية لنقطة معينة على منحنى طلب خطي (أي على خط الطلب) تساوي نسبة <span class="mem" onclick="peek(this)">الجزء الأيمن</span> إلى <span class="mem" onclick="peek(this)">الجزء الأيسر</span> من خط الطلب أي أن:<span class="cite">[span_27](start_span)[span_27](end_span)</span>
-                </p>
-
-                <div class="math-container">
-                    <div class="math-row" style="direction: rtl;">
-                        <span>Ep =</span>
-                        <div class="frac">
-                            <span class="num">الجزء الايمن</span>
-                            <span class="den">الجزء الايسر</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- مثال النقاط الخمس والرسوم الخاصة بها -->
-            <div class="bento-card" onclick="focusCard(this)">
-                <div class="card-header">
-                    <h2 class="card-title">مثال: إيجاد مرونة النقاط (D, P, B, L, M)</h2>
-                    <span class="check-pill" onclick="toggleDone(event, this)">✔ فهمتها</span>
-                </div>
-                <p>وبناء على ذلك، من الملاحظ الطلب ذو الخط المستقيم له <span class="mem" onclick="peek(this)">مرونات مختلفة</span> باختلاف موقع النقاط عليه:<span class="cite">[span_28](start_span)[span_28](end_span)</span></p>
-
-                <!-- الرسمان البيانيان 3 و 4 في الملزمة -->
-                <div class="svg-box">
-                    <svg width="320" height="210" viewBox="0 0 320 210">
-                        <line x1="40" y1="20" x2="40" y2="170" class="axis" />
-                        <line x1="40" y1="170" x2="290" y2="170" class="axis" />
-                        <text x="12" y="45">السعر</text>
-                        <text x="260" y="198">الكمية</text>
-
-                        <line x1="40" y1="35" x2="260" y2="170" class="curve" />
-
-                        <!-- D (0) -->
-                        <circle cx="40" cy="35" r="4" class="point" />
-                        <text x="48" y="30">D (Ed = ∞)</text>
-                        <text x="35" y="190">0</text>
-
-                        <!-- P (5) -->
-                        <line x1="95" y1="69" x2="95" y2="170" class="dashed" />
-                        <circle cx="95" cy="69" r="4" class="point" />
-                        <text x="102" y="64">P (Ed &gt; 1)</text>
-                        <text x="90" y="190">5</text>
-
-                        <!-- B (10) -->
-                        <line x1="150" y1="102" x2="150" y2="170" class="dashed" />
-                        <circle cx="150" cy="102" r="4" class="point" />
-                        <text x="157" y="97">B (Ed = 1)</text>
-                        <text x="142" y="190">10</text>
-
-                        <!-- L (15) -->
-                        <line x1="205" y1="136" x2="205" y2="170" class="dashed" />
-                        <circle cx="205" cy="136" r="4" class="point" />
-                        <text x="212" y="131">L (Ed &lt; 1)</text>
-                        <text x="197" y="190">15</text>
-
-                        <!-- M (20) -->
-                        <circle cx="260" cy="170" r="4" class="point" />
-                        <text x="265" y="162">M (Ed = 0)</text>
-                        <text x="252" y="190">20</text>
-                    </svg>
-                </div>
-
-                <table>
-                    <tr>
-                        <th>النقاط</th>
-                        <th>تطبيق القانون (الايمن / الايسر)</th>
-                        <th>معامل المرونة (Ed)</th>
-                    </tr>
-                    <tr>
-                        <td><strong>M</strong></td>
-                        <td dir="ltr">0 / 20 = 0</td>
-                        <td><span class="mem" onclick="peek(this)">Ed = 0</span></td>
-                    </tr>
-                    <tr>
-                        <td><strong>L</strong></td>
-                        <td dir="ltr">5 / 15 = 0.3</td>
-                        <td><span class="mem" onclick="peek(this)">Ed &lt; 1</span></td>
-                    </tr>
-                    <tr>
-                        <td><strong>B</strong></td>
-                        <td dir="ltr">10 / 10 = 1</td>
-                        <td><span class="mem" onclick="peek(this)">Ed = 1</span></td>
-                    </tr>
-                    <tr>
-                        <td><strong>P</strong></td>
-                        <td dir="ltr">15 / 5 = 3</td>
-                        <td><span class="mem" onclick="peek(this)">Ed &gt; 1</span></td>
-                    </tr>
-                    <tr>
-                        <td><strong>D</strong></td>
-                        <td dir="ltr">20 / 0 = ∞</td>
-                        <td><span class="mem" onclick="peek(this)">Ed = ∞</span></td>
-                    </tr>
-                </table>
-                <span class="cite">[span_29](start_span)[span_29](end_span)</span>
-            </div>
-
-            <!-- منحنى الطلب غير الخطي -->
-            <div class="bento-card" onclick="focusCard(this)">
-                <div class="card-header">
-                    <h2 class="card-title">حالة منحنى الطلب غير الخطي</h2>
-                    <span class="check-pill" onclick="toggleDone(event, this)">✔ فهمتها</span>
-                </div>
-                <p>
-                    أما إذ كان منحنى الطلب غير خطي، فأن قياس مرونة النقطة يستلزم رسم <span class="mem" onclick="peek(this)">خط مماس</span> لمنحنى الطلب، بحيث يحصل التماس في النقطة التي نريد قياس درجة مرونتها (النقطة P مثلاً). وان مرونة الطلب في نقطة التماس ستكون <span class="mem" onclick="peek(this)">مساوية لمرونة الخط</span> في تلك النقطة.<span class="cite">[span_30](start_span)[span_30](end_span)</span>
-                    حيث نجد في الرسم البياني ان الخط (MN) يمس منحنى الطلب في نقطة (P). وان مرونة هذه النقطة هي:<span class="cite">[span_31](start_span)[span_31](end_span)</span>
-                </p>
-
-                <div class="math-container">
-                    <div class="math-row">
-                        <span>Ep =</span>
-                        <div class="frac"><span class="num">PN</span><span class="den">PM</span></div>
-                        <span>=</span>
-                        <div class="frac"><span class="num">QN</span><span class="den">0Q</span></div>
-                    </div>
-                </div>
-
-                <!-- الرسم البياني 5: المنحنى غير الخطي والخط المماس -->
-                <div class="svg-box">
-                    <svg width="300" height="200" viewBox="0 0 300 200">
-                        <line x1="45" y1="15" x2="45" y2="165" class="axis" />
-                        <line x1="45" y1="165" x2="280" y2="165" class="axis" />
-                        <text x="15" y="35">السعر</text>
-                        <text x="245" y="185">الكمية</text>
-                        <text x="32" y="182">0</text>
-
-                        <!-- الخط المماس MN -->
-                        <line x1="45" y1="45" x2="230" y2="165" stroke="#38bdf8" stroke-width="2" />
-                        <text x="28" y="50" font-weight="bold">M</text>
-                        <text x="230" y="182" font-weight="bold">N</text>
-
-                        <!-- المنحنى غير الخطي -->
-                        <path d="M 95 25 Q 105 112 215 130" fill="none" stroke="#10b981" stroke-width="3.5" />
-
-                        <!-- نقطة التماس P -->
-                        <circle cx="132" cy="101" r="5" class="point" />
-                        <text x="138" y="95" font-weight="bold">P</text>
-                        <line x1="45" y1="101" x2="132" y2="101" class="dashed" />
-                        <line x1="132" y1="101" x2="132" y2="165" class="dashed" />
-                        <text x="28" y="105">R</text>
-                        <text x="127" y="182">Q</text>
-                    </svg>
-                </div>
-            </div>
-        </div>
-
-        <!-- ==================== القسم 3: نظرية العرض ==================== -->
-        <div id="sec-supply" class="page-section">
-
-            <div class="bento-card" onclick="focusCard(this)">
-                <div class="card-header">
-                    <h2 class="card-title">الفصل الثاني: نظرية العرض</h2>
-                    <span class="check-pill" onclick="toggleDone(event, this)">✔ فهمتها</span>
-                </div>
-                <p>
-                    <strong>عرض السوق:</strong> الكميات التي يرتضي <span class="mem" onclick="peek(this)">البائعون والمنتجون</span> بيعها في وقت معين، مقابل مستويات مختلفة من الأسعار، بافتراض <span class="mem" onclick="peek(this)">بقاء الأمور الأخرى على حالها</span>. وجدول العرض يمثل العلاقة <span class="mem" onclick="peek(this)">الموجبة (الطردية)</span> بين السعر والكمية.<span class="cite">[span_32](start_span)[span_32](end_span)[span_33](start_span)[span_33](end_span)</span>
-                </p>
-                <p>
-                    <strong>الفرق بين العرض والكمية المعروضة:</strong><br>
-                    • <strong>العرض:</strong> <span class="mem" onclick="peek(this)">كافة العلاقة</span> بين السعر والكمية، أي قائمة الكميات عند الأسعار المختلفة.<br>
-                    • <strong>الكمية المعروضة:</strong> <span class="mem" onclick="peek(this)">كمية معينة</span>، أي <span class="mem" onclick="peek(this)">نقطة محددة</span> من القائمة أو من منحنى العرض.<span class="cite">[span_34](start_span)[span_34](end_span)[span_35](start_span)[span_35](end_span)[span_36](start_span)[span_36](end_span)</span>
-                </p>
-            </div>
-
-            <!-- جدول ومنحنى العرض الافتراضي كامل -->
-            <div class="bento-card" onclick="focusCard(this)">
-                <div class="card-header">
-                    <h2 class="card-title">جدول (1) وشكل (1) ودالة العرض</h2>
-                    <span class="check-pill" onclick="toggleDone(event, this)">✔ فهمتها</span>
-                </div>
-
-                <table>
-                    <tr>
-                        <th>سعر وحدة السلعة (دينار)</th>
-                        <th>الكمية المعروضة (شهريا)</th>
-                    </tr>
-                    <tr><td>600</td><td><span class="mem" onclick="peek(this)">1900</span></td></tr>
-                    <tr><td>500</td><td><span class="mem" onclick="peek(this)">1700</span></td></tr>
-                    <tr><td>400</td><td><span class="mem" onclick="peek(this)">1300</span></td></tr>
-                    <tr><td>300</td><td><span class="mem" onclick="peek(this)">1000</span></td></tr>
-                    <tr><td>200</td><td><span class="mem" onclick="peek(this)">600</span></td></tr>
-                </table>
-                <span class="cite">[span_43](start_span)[span_43](end_span)</span>
-
-                <!-- الرسم البياني 6: منحنى العرض S -->
-                <div class="svg-box">
-                    <svg width="310" height="200" viewBox="0 0 310 200">
-                        <line x1="45" y1="15" x2="45" y2="165" class="axis" />
-                        <line x1="45" y1="165" x2="290" y2="165" class="axis" />
-                        <text x="28" y="25" font-weight="bold">P</text>
-                        <text x="292" y="170" font-weight="bold">Q</text>
-                        <text x="32" y="182">0</text>
-
-                        <!-- منحنى العرض S -->
-                        <line x1="65" y1="145" x2="255" y2="25" class="curve" />
-                        <text x="260" y="25" font-weight="bold">S</text>
-
-                        <!-- 200 -> 600 -->
-                        <line x1="45" y1="130" x2="90" y2="130" class="dashed" />
-                        <line x1="90" y1="130" x2="90" y2="165" class="dashed" />
-                        <text x="15" y="134">200</text><text x="78" y="182">600</text>
-
-                        <!-- 300 -> 1000 -->
-                        <line x1="45" y1="102" x2="135" y2="102" class="dashed" />
-                        <line x1="135" y1="102" x2="135" y2="165" class="dashed" />
-                        <text x="15" y="106">300</text><text x="120" y="182">1000</text>
-
-                        <!-- 400 -> 1300 -->
-                        <line x1="45" y1="73" x2="180" y2="73" class="dashed" />
-                        <line x1="180" y1="73" x2="180" y2="165" class="dashed" />
-                        <text x="15" y="77">400</text><text x="165" y="182">1300</text>
-
-                        <!-- 500 -> 1700 -->
-                        <line x1="45" y1="45" x2="225" y2="45" class="dashed" />
-                        <line x1="225" y1="45" x2="225" y2="165" class="dashed" />
-                        <text x="15" y="49">500</text><text x="210" y="182">1700</text>
-                    </svg>
-                    <div class="svg-caption">شكل (1) منحنى العرض<span class="cite">[span_44](start_span)[span_44](end_span)</span></div>
-                </div>
-
-                <p>السعر هو <span class="mem" onclick="peek(this)">المتغير المستقل</span> والكمية هي <span class="mem" onclick="peek(this)">المتغير التابع</span>، وباتجاه طردي، ويعبَّر عنها بالدالة:<span class="cite">[span_42](start_span)[span_42](end_span)[span_45](start_span)[span_45](end_span)</span></p>
-
-                <div class="math-container">
-                    <div class="math-row">
-                        <span class="mem" onclick="peek(this)">Qs = f(p)</span>
-                    </div>
-                </div>
-
-                <p>أي أن الكمية المعروضة (Qs) دالة تابعة (f) للتغير في سعر السلعة (p).<span class="cite">[span_46](start_span)[span_46](end_span)</span></p>
-            </div>
-
-            <!-- سبب العلاقة الطردية + النقطتان -->
-            <div class="bento-card" onclick="focusCard(this)">
-                <div class="card-header">
-                    <h2 class="card-title">لماذا العلاقة طردية؟ ونقطتان مهمتان</h2>
-                    <span class="check-pill" onclick="toggleDone(event, this)">✔ فهمتها</span>
-                </div>
-                <p>
-                    <strong>سببا العلاقة الطردية:</strong><br>
-                    1) <strong><span class="mem" onclick="peek(this)">تعظيم الأرباح</span>:</strong> ارتفاع السعر يزيد الربحية، فيحوّل المنتجون المصادر من سلع أقل ربحاً إلى سلع أكثر ربحاً.<span class="cite">[span_37](start_span)[span_37](end_span)[span_38](start_span)[span_38](end_span)</span><br>
-                    2) <strong><span class="mem" onclick="peek(this)">تكلفة الإنتاج</span>:</strong> زيادة الإنتاج تتطلب سحب مصادر من سلع أخرى بمكافآت <span class="mem" onclick="peek(this)">أعلى</span> وكفاءة <span class="mem" onclick="peek(this)">أقل</span>، فيرتفع متوسط التكلفة <span class="mem" onclick="peek(this)">باضطراد</span>، الأمر الذي يستلزم زيادة السعر.<span class="cite">[span_48](start_span)[span_48](end_span)[span_49](start_span)[span_49](end_span)[span_50](start_span)[span_50](end_span)[span_51](start_span)[span_51](end_span)[span_52](start_span)[span_52](end_span)</span>
-                </p>
-
-                <div class="note-box">
-                    <strong>نقطتان يجب الانتباه لهما:</strong><span class="cite">[span_39](start_span)[span_39](end_span)</span><br>
-                    <strong>1- <span class="mem" onclick="peek(this)">تثبيت العوامل الأخرى</span>:</strong> جدول العرض يفترض أن الكمية تتأثر فقط بسعر السلعة نفسها، ونثبّت بقية العوامل لنركز على هذه العلاقة.<span class="cite">[span_40](start_span)[span_40](end_span)</span><br>
-                    <strong>2- <span class="mem" onclick="peek(this)">عنصر الزمن</span>:</strong> كل كمية في الجدول مرتبطة بسعر معين وبـ<span class="mem" onclick="peek(this)">فترة زمنية محددة</span> أيضاً.<span class="cite">[span_41](start_span)[span_41](end_span)</span>
-                </div>
-            </div>
-        </div>
-
-        <!-- ==================== القسم 4: الملخص والاختبار ==================== -->
-        <div id="sec-summary" class="page-section">
-            
-            <div class="bento-card" onclick="focusCard(this)">
-                <div class="card-header">
-                    <h2 class="card-title">📌 الزبدة والملخص المركز للامتحان</h2>
-                    <span class="check-pill" onclick="toggleDone(event, this)">✔ جاهز</span>
-                </div>
+        <div class="content-box">
+            <div class="academic-view">
                 <ul>
-                    <li><strong>مرونة القوس:</strong> تقيس المرونة بين نقطتين للتغيرات الكبيرة، وقيمتها <strong>تتغير</strong> إذا انعكس اتجاه تحرك السعر (من j إلى k = -1.49، ومن k إلى j = 0.43).<span class="cite">[span_53](start_span)[span_53](end_span)[span_54](start_span)[span_54](end_span)</span></li>
-                    <li><strong>مرونة النقطة:</strong> بديل للقوس للتغيرات متناهية الصغر، تستخدم المشتقة (∂Q/∂P)، وهندسياً تساوي <strong>(الجزء الأيمن ÷ الجزء الأيسر)</strong>.<span class="cite">[span_55](start_span)[span_55](end_span)[span_56](start_span)[span_56](end_span)</span></li>
-                    <li><strong>قيم مرونة النقطة على الخط المستقيم:</strong> في الأسفل M (0)، أسفل المنتصف L (&lt;1)، في المنتصف B (=1)، أعلى المنتصف P (&gt;1)، في الأعلى D (∞).<span class="cite">[span_57](start_span)[span_57](end_span)[span_58](start_span)[span_58](end_span)</span></li>
-                    <li><strong>المنحنى غير الخطي:</strong> نقيس مرونة النقطة عليه برسم <strong>خط مماس (MN)</strong> يمس المنحنى في تلك النقطة (Ep = PN/PM = QN/0Q).<span class="cite">[span_59](start_span)[span_59](end_span)</span></li>
-                    <li><strong>نظرية العرض:</strong> علاقة موجبة (طردية) حيث السعر متغير مستقل والكمية متغير تابع <code>Qs = f(p)</code>، مع شرط تثبيت العوامل الأخرى وتحديد الفترة الزمنية.<span class="cite">[span_60](start_span)[span_60](end_span)[span_61](start_span)[span_61](end_span)</span></li>
-                    <li><strong>سببا العلاقة الطردية للعرض:</strong> 1) السعي لتعظيم الأرباح، 2) الارتفاع المضطرد في متوسط تكلفة الإنتاج بسبب سحب عناصر إنتاج بمكافآت أعلى وكفاءة أقل.<span class="cite">[span_62](start_span)[span_62](end_span)[span_63](start_span)[span_63](end_span)</span></li>
+                    <li><b>التعريف:</b> تمثل مرونة القوس قياس المرونة بين <span class="kw">نقطتين محددتين</span> على منحنى طلب معين وتستخدم <span class="kw">للتغيرات الكبيرة</span> (مثل القياس بين النقطتين j و k).</li>
+                    <li><b>الصيغة الرياضية:</b>
+                        <div class="math-block">
+                            Ed = <span class="frac"><sup>%ΔQd</sup><sub>%ΔP</sub></span> &rArr; 
+                            <span class="frac"><sup>Q2 - Q1</sup><sub>P2 - P1</sub></span> &times; <span class="frac"><sup>P1</sup><sub>Q1</sub></span>
+                        </div>
+                    </li>
+                    <li><b>1) مرونة القوس من (j) إلى (k) [انخفاض السعر من 20 إلى 10]:</b>
+                        <div class="math-block">
+                            Ed = <span class="frac"><sup>75 - 43</sup><sub>10 - 20</sub></span> &times; <span class="frac"><sup>20</sup><sub>43</sub></span> = 
+                            <span class="frac"><sup>32</sup><sub>-10</sub></span> &times; <span class="frac"><sup>20</sup><sub>43</sub></span> = 
+                            <span class="frac"><sup>640</sup><sub>-430</sub></span> = <span class="kw">-1.49</span>
+                        </div>
+                        <b>التعليق:</b> بمعنى أن <span class="kw">انخفاضاً</span> قدره (1%) في سعر السلعة (x) ينجم عنه <span class="kw">زيادة</span> مقدارها (1.49%) في الطلب على السلعة.
+                    </li>
+                    <li><b>2) مرونة القوس من (k) إلى (j) [ارتفاع السعر من 10 إلى 20]:</b>
+                        <div class="math-block">
+                            Ed = <span class="frac"><sup>43 - 75</sup><sub>20 - 10</sub></span> &times; <span class="frac"><sup>10</sup><sub>75</sub></span> = 
+                            <span class="frac"><sup>-32</sup><sub>10</sub></span> &times; <span class="frac"><sup>10</sup><sub>75</sub></span> = 
+                            <span class="frac"><sup>320</sup><sub>750</sub></span> = <span class="kw">0.43</span>
+                        </div>
+                        <b>التعليق:</b> بمعنى أن <span class="kw">ارتفاعاً</span> قدره (1%) في سعر السلعة (x) ينجم عنه <span class="kw">انخفاض</span> مقداره (0.43%) في الطلب على السلعة.
+                    </li>
                 </ul>
             </div>
-
-            <!-- اختبار تفاعلي سريع لتثبيت الحفظ -->
-            <div class="bento-card" onclick="focusCard(this)">
-                <div class="card-header">
-                    <h2 class="card-title">⚡ اختبر نفسك قبل الامتحان (اضغط على الإجابة)</h2>
-                </div>
-
-                <p><strong>1. عند عكس اتجاه التغير في السعر بين نفس النقطتين، فإن معامل مرونة القوس:</strong></p>
-                <button class="quiz-option" onclick="checkQuiz(this, false)">يبقى ثابتاً لا يتغير</button>
-                <button class="quiz-option" onclick="checkQuiz(this, true)">يتغير وينطوي على معامل مرونة مختلف</button>
-
-                <p style="margin-top: 18px;"><strong>2. هندسياً، المرونة السعرية لنقطة معينة على خط الطلب تساوي:</strong></p>
-                <button class="quiz-option" onclick="checkQuiz(this, true)">نسبة الجزء الأيمن إلى الجزء الأيسر</button>
-                <button class="quiz-option" onclick="checkQuiz(this, false)">نسبة الجزء الأيسر إلى الجزء الأيمن</button>
-
-                <p style="margin-top: 18px;"><strong>3. في معادلة العرض Qs = f(p)، يمثل السعر (p):</strong></p>
-                <button class="quiz-option" onclick="checkQuiz(this, false)">المتغير التابع</button>
-                <button class="quiz-option" onclick="checkQuiz(this, true)">المتغير المستقل</button>
+            <div class="street-view">
+                <b>☕ الفكرة بالعامية:</b><br>
+                مرونة القوس نستخدمها من يصير "فرق جبير" بالسعر (مو دينار أو دينارين، وإنما السعر ينزل للنص من 20 إلى 10).<br>
+                القانون كلش بسيط: <b>(الكمية الجديدة - القديمة) ÷ (السعر الجديد - القديم) × (السعر القديم ÷ الكمية القديمة)</b>.<br>
+                كل اللي عليك تنتبهله بالسؤال هو: <b>منين بدينا؟</b> إذا كال من j إلى k فالسعر القديم 20 والكمية القديمة 43. وإذا كال من k إلى j تقلب القديم والحديث!
             </div>
-
+            <div class="graph-view">
+                <svg width="260" height="200" viewBox="0 0 260 200">
+                    <line x1="40" y1="20" x2="40" y2="160" stroke="#000" stroke-width="2"/>
+                    <line x1="40" y1="160" x2="230" y2="160" stroke="#000" stroke-width="2"/>
+                    <text x="25" y="25" font-weight="bold">P</text>
+                    <text x="235" y="165" font-weight="bold">Q</text>
+                    <line x1="60" y1="45" x2="195" y2="145" stroke="#2563eb" stroke-width="3"/>
+                    <text x="200" y="145" font-weight="bold">D</text>
+                    <line x1="40" y1="70" x2="95" y2="70" stroke="#555" stroke-dasharray="4"/>
+                    <line x1="95" y1="70" x2="95" y2="160" stroke="#555" stroke-dasharray="4"/>
+                    <circle cx="95" cy="70" r="4" fill="#dc2626"/>
+                    <text x="100" y="65" font-weight="bold">j</text>
+                    <text x="18" y="75" font-size="12">20</text>
+                    <text x="88" y="175" font-size="12">43</text>
+                    <line x1="40" y1="115" x2="155" y2="115" stroke="#555" stroke-dasharray="4"/>
+                    <line x1="155" y1="115" x2="155" y2="160" stroke="#555" stroke-dasharray="4"/>
+                    <circle cx="155" cy="115" r="4" fill="#dc2626"/>
+                    <text x="162" y="110" font-weight="bold">k</text>
+                    <text x="18" y="120" font-size="12">10</text>
+                    <text x="148" y="175" font-size="12">75</text>
+                </svg>
+            </div>
         </div>
-
+        <div class="controls">
+            <button class="ctrl-btn btn-acad" onclick="switchMode('card1', 'acad')">📖 للامتحان</button>
+            <button class="ctrl-btn btn-str" onclick="switchMode('card1', 'str')">☕ بالعامية</button>
+            <button class="ctrl-btn btn-cloze" onclick="toggleCloze('card1')">🔑 فراغات ذكية</button>
+            <button class="ctrl-btn btn-graph" onclick="toggleGraph('card1')">📊 الرسم</button>
+            <button class="ctrl-btn btn-hide" onclick="toggleBlur('card1')">👁️ إخفاء</button>
+            <button class="ctrl-btn btn-done" onclick="toggleMastery('card1')">✅ حفظتها</button>
+        </div>
     </div>
 
-    <!-- الشريط السفلي العائم للتنقل -->
-    <div class="bottom-nav">
-        <button class="nav-item active" onclick="switchSection('sec-arc', this)">1. القوس</button>
-        <button class="nav-item" onclick="switchSection('sec-point', this)">2. النقطة</button>
-        <button class="nav-item" onclick="switchSection('sec-supply', this)">3. العرض</button>
-        <button class="nav-item" onclick="switchSection('sec-summary', this)">4. الملخص</button>
+    <!-- CARD 2: مشكلة مرونة القوس -->
+    <div class="card" id="card2" data-id="2">
+        <div class="card-header">
+            <h2 class="card-title">2. تعليل: مشكلة مرونة القوس وانقلاب الاتجاه</h2>
+            <span class="badge">سؤال امتحاني مهم</span>
+        </div>
+        <div class="content-box">
+            <div class="academic-view">
+                <ul>
+                    <li><b>المشكلة:</b> إن استخدام مرونة القوس يستلزم <span class="kw">عناية كبيرة</span> من جانب متخذ القرار، لأنها قد تنطوي على احتمال <span class="kw">الوقوع في الخطأ</span>.</li>
+                    <li><b>التعليل (السبب):</b> حيث يختلف <span class="kw">معامل مرونة القوس</span> بين نفس النقطتين على منحنى الطلب، إذا انقلب <span class="kw">اتجاه التغير</span> في سعر السلعة.</li>
+                    <li><b>التوضيح من المثال:</b> إذا كانت مرونة القوس تساوي (1.49%) عند التحرك من النقطة (j) إلى (k)؛ فإن هذه المرونة لا تظل كما هي، بل تتغير إلى (0.43%) عند التحرك المقلوب من (k) إلى (j).</li>
+                    <li><b>الاستنتاج النهائي:</b> إن التحرك المقلوب في سعر السلعة ينطوي على معامل مرونة مختلف، أي أن معامل مرونة القوس يعتمد أيضاً على <span class="kw">اتجاه التغير في سعر السلعة</span>.</li>
+                </ul>
+            </div>
+            <div class="street-view">
+                <b>☕ الفكرة بالعامية:</b><br>
+                تخيل سلعة سعرها نزل من 20 إلى 10، وبعدين رجع صعد من 10 إلى 20. منطقياً المفروض المرونة نفسها لأن النقطتين نفسهن! <br>
+                بس بقانون القوس النتيجة تطلع مختلفة تماماً (مرة 1.49 ومرة 0.43). ليش؟ لأن الرقم اللي نقسم عليه بالمقام <b>(السعر القديم والكمية القديمة)</b> تغير! وهذا الشي يغلط المدير أو متخذ القرار بالسوق.
+            </div>
+        </div>
+        <div class="controls">
+            <button class="ctrl-btn btn-acad" onclick="switchMode('card2', 'acad')">📖 للامتحان</button>
+            <button class="ctrl-btn btn-str" onclick="switchMode('card2', 'str')">☕ بالعامية</button>
+            <button class="ctrl-btn btn-cloze" onclick="toggleCloze('card2')">🔑 فراغات ذكية</button>
+            <button class="ctrl-btn btn-hide" onclick="toggleBlur('card2')">👁️ إخفاء</button>
+            <button class="ctrl-btn btn-done" onclick="toggleMastery('card2')">✅ حفظتها</button>
+        </div>
     </div>
 
-    <script>
-        // التنقل بين الأقسام الأربعة
-        function switchSection(secId, btn) {
-            document.querySelectorAll('.page-section').forEach(sec => sec.classList.remove('active'));
-            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
-            
-            document.getElementById(secId).classList.add('active');
-            btn.classList.add('active');
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
+    <!-- CARD 3: مرونة النقطة والاشتقاق الهندسي -->
+    <div class="card" id="card3" data-id="3">
+        <div class="card-header">
+            <h2 class="card-title">3. تاسعاً: مرونة النقطة والاشتقاق الهندسي</h2>
+            <span class="badge">الفصل الأول</span>
+        </div>
+        <div class="content-box">
+            <div class="academic-view">
+                <ul>
+                    <li><b>الفكرة والتعريف:</b> طريقة لتبسيط مشكلة قياس مرونة الطلب (بديل لمرونة القوس)، نفترض فيها وجود <span class="kw">منحنى طلب خطي</span> حيث تكون تركيبة التغير في السعر والكمية المطلوبة <span class="kw">متناهية في الصغر</span> (عند التحرك من B نحو P يصغر التغير ΔP حتى نصل إلى P تقريباً).</li>
+                    <li><b>الصيغة الرياضية (المشتقة):</b>
+                        <div class="math-block">
+                            Ep = <span class="frac"><sup>∂Q</sup><sub>∂P</sub></span> &times; <span class="frac"><sup>P</sup><sub>Q</sub></span>
+                        </div>
+                        حيث تم الاستعاضة عن <span class="frac"><sup>ΔQd</sup><sub>ΔP</sub></span> بالمشتقة <span class="frac"><sup>∂Q</sup><sub>∂P</sub></span> التي تعبر عن <span class="kw">انحدار خط الطلب</span> (DM).
+                    </li>
+                    <li><b>الاشتقاق الهندسي على الخط المستقيم (DM) في النقطة (P):</b>
+                        انحدار الخط يعطينا هندسياً <span class="frac"><sup>QM</sup><sub>PQ</sub></span>، وبما أن السعر في النقطة P هو (<span class="kw">P = PQ</span>) والكمية هي (<span class="kw">Q = 0Q</span>)، فبالتعويض نصل إلى:
+                        <div class="math-block">
+                            Ep = <span class="frac"><sup>QM</sup><sub>PQ</sub></span> &times; <span class="frac"><sup>PQ</sup><sub>0Q</sub></span> &rArr; Ep = <span class="frac"><sup>QM</sup><sub>0Q</sub></span>
+                        </div>
+                    </li>
+                    <li><b>القانون الهندسي العام:</b> المرونة السعرية لنقطة على خط الطلب تساوي نسبة <span class="kw">الجزء الأيمن</span> إلى <span class="kw">الجزء الأيسر</span> من خط الطلب:
+                        <div class="math-block" style="direction: rtl;">
+                            Ep = <span class="frac"><sup>الجزء الأيمن</sup><sub>الجزء الأيسر</sub></span>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+            <div class="street-view">
+                <b>☕ الفكرة بالعامية:</b><br>
+                حتى نخلص من مشكلة "اتجاه السعر" مال مرونة القوس، كلنا خلي نقيس المرونة <b>بنقطة وحدة بس</b> (تغير كلش صغير يكاد يكون صفر).<br>
+                وبما أن خط الطلب عدل (مستقيم)، علماء الاقتصاد اختصروا المشتقة والرياضيات بقانون هندسي يجنن: أوكف على النقطة اللي يريدها، واقسم <b>(طول الخط الجوه اللي على يمينك ÷ طول الخط الفوك اللي على يسارك)</b>.
+            </div>
+            <div class="graph-view">
+                <svg width="260" height="200" viewBox="0 0 260 200">
+                    <line x1="40" y1="20" x2="40" y2="160" stroke="#000" stroke-width="2"/>
+                    <line x1="40" y1="160" x2="230" y2="160" stroke="#000" stroke-width="2"/>
+                    <text x="15" y="30" font-size="12" font-weight="bold">السعر</text>
+                    <text x="215" y="178" font-size="12" font-weight="bold">الكمية</text>
+                    <text x="30" y="172" font-size="12">0</text>
+                    <line x1="40" y1="35" x2="200" y2="160" stroke="#2563eb" stroke-width="3"/>
+                    <text x="25" y="40" font-weight="bold">D</text>
+                    <text x="200" y="175" font-weight="bold">M</text>
+                    <circle cx="85" cy="70" r="4" fill="#dc2626"/>
+                    <text x="88" y="65" font-weight="bold">P</text>
+                    <line x1="85" y1="70" x2="85" y2="160" stroke="#555" stroke-dasharray="3"/>
+                    <text x="80" y="175" font-weight="bold">Q</text>
+                    <circle cx="130" cy="105" r="4" fill="#059669"/>
+                    <text x="135" y="100" font-weight="bold">B</text>
+                    <line x1="130" y1="105" x2="130" y2="160" stroke="#555" stroke-dasharray="3"/>
+                    <text x="125" y="175" font-weight="bold">N</text>
+                </svg>
+            </div>
+        </div>
+        <div class="controls">
+            <button class="ctrl-btn btn-acad" onclick="switchMode('card3', 'acad')">📖 للامتحان</button>
+            <button class="ctrl-btn btn-str" onclick="switchMode('card3', 'str')">☕ بالعامية</button>
+            <button class="ctrl-btn btn-cloze" onclick="toggleCloze('card3')">🔑 فراغات ذكية</button>
+            <button class="ctrl-btn btn-graph" onclick="toggleGraph('card3')">📊 الرسم</button>
+            <button class="ctrl-btn btn-hide" onclick="toggleBlur('card3')">👁️ إخفاء</button>
+            <button class="ctrl-btn btn-done" onclick="toggleMastery('card3')">✅ حفظتها</button>
+        </div>
+    </div>
 
-        // تغيير طور الدراسة (قراءة / تسميع / تركيز)
-        function setMode(mode, btn) {
-            document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
+    <!-- CARD 4: جدول نقاط المرونة + المنحنى غير الخطي -->
+    <div class="card" id="card4" data-id="4">
+        <div class="card-header">
+            <h2 class="card-title">4. قيم مرونة النقطة الـ 5 + المنحنى غير الخطي</h2>
+            <span class="badge">تطبيق + مماس</span>
+        </div>
+        <div class="content-box">
+            <div class="academic-view">
+                <ul>
+                    <li><b>قاعدة مهمة:</b> خط الطلب المستقيم له <span class="kw">مرونات مختلفة</span> باختلاف موقع النقاط عليه (المسافة الكلية = 20):</li>
+                </ul>
+                <table class="eco-table">
+                    <thead>
+                        <tr>
+                            <th>النقطة</th>
+                            <th>تطبيق القانون (الأيمن ÷ الأيسر)</th>
+                            <th>معامل المرونة (Ed)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><b>M</b> (نهاية الخط أفقياً)</td>
+                            <td>0 ÷ 20 = <span class="kw">0</span></td>
+                            <td><b>Ed = 0</b></td>
+                        </tr>
+                        <tr>
+                            <td><b>L</b> (القسم السفلي)</td>
+                            <td>5 ÷ 15 = <span class="kw">0.3</span></td>
+                            <td><b>Ed &lt; 1</b></td>
+                        </tr>
+                        <tr>
+                            <td><b>B</b> (المنتصف)</td>
+                            <td>10 ÷ 10 = <span class="kw">1</span></td>
+                            <td><b>Ed = 1</b></td>
+                        </tr>
+                        <tr>
+                            <td><b>P</b> (القسم العلوي)</td>
+                            <td>15 ÷ 5 = <span class="kw">3</span></td>
+                            <td><b>Ed &gt; 1</b></td>
+                        </tr>
+                        <tr>
+                            <td><b>D</b> (بداية الخط عمودياً)</td>
+                            <td>20 ÷ 0 = <span class="kw">&infin;</span></td>
+                            <td><b>Ed = &infin;</b></td>
+                        </tr>
+                    </tbody>
+                </table>
+                <ul>
+                    <li><b>حالة منحنى الطلب غير الخطي (المقوس):</b> قياس مرونة النقطة يستلزم رسم <span class="kw">خط مماس</span> لمنحنى الطلب، بحيث يحصل التماس في النقطة المراد قياسها (النقطة P مثلاً). وتكون مرونة الطلب في نقطة التماس مساوية لمرونة الخط (MN) في تلك النقطة:
+                        <div class="math-block">
+                            Ep = <span class="frac"><sup>PN</sup><sub>PM</sub></span> = <span class="frac"><sup>QN</sup><sub>0Q</sub></span>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+            <div class="street-view">
+                <b>☕ الفكرة بالعامية:</b><br>
+                تخيل خط الطلب طوله 20 سنتيمتر:<br>
+                - بالنص بالضبط (B): يمينك 10 ويسارك 10، فـ 10÷10 = <b>1</b>.<br>
+                - كلما تصعد لفوك (P و D) الرقم يكبر (يصير <b>3</b> وبالقمة يصير <b>ما لا نهاية &infin;</b> لأن تقسم على صفر).<br>
+                - كلما تنزل لجوه (L و M) الرقم يصغر (يصير <b>0.3</b> وبالقاع يصير <b>صفر</b>).<br>
+                <b>وإذا الخط أعوج (غير خطي)؟</b> بس جيب مسطرة وارسم "خط مماس" يطخ القوس بالنقطة P، وطبق نفس القانون على المسطرة!
+            </div>
+            <div class="graph-view">
+                <svg width="260" height="190" viewBox="0 0 260 190">
+                    <line x1="40" y1="15" x2="40" y2="155" stroke="#000" stroke-width="2"/>
+                    <line x1="40" y1="155" x2="230" y2="155" stroke="#000" stroke-width="2"/>
+                    <line x1="40" y1="35" x2="200" y2="155" stroke="#64748b" stroke-width="2"/>
+                    <text x="25" y="40" font-weight="bold">M</text>
+                    <text x="200" y="172" font-weight="bold">N</text>
+                    <path d="M 75 25 Q 85 120 185 125" fill="none" stroke="#dc2626" stroke-width="3"/>
+                    <circle cx="112" cy="89" r="4" fill="#2563eb"/>
+                    <text x="118" y="84" font-weight="bold">P</text>
+                    <line x1="40" y1="89" x2="112" y2="89" stroke="#555" stroke-dasharray="3"/>
+                    <line x1="112" y1="89" x2="112" y2="155" stroke="#555" stroke-dasharray="3"/>
+                    <text x="25" y="93" font-size="12">R</text>
+                    <text x="108" y="172" font-size="12">Q</text>
+                    <text x="28" y="170" font-size="12">0</text>
+                </svg>
+            </div>
+        </div>
+        <div class="controls">
+            <button class="ctrl-btn btn-acad" onclick="switchMode('card4', 'acad')">📖 للامتحان</button>
+            <button class="ctrl-btn btn-str" onclick="switchMode('card4', 'str')">☕ بالعامية</button>
+            <button class="ctrl-btn btn-cloze" onclick="toggleCloze('card4')">🔑 فراغات ذكية</button>
+            <button class="ctrl-btn btn-graph" onclick="toggleGraph('card4')">📊 رسم المماس</button>
+            <button class="ctrl-btn btn-hide" onclick="toggleBlur('card4')">👁️ إخفاء</button>
+            <button class="ctrl-btn btn-done" onclick="toggleMastery('card4')">✅ حفظتها</button>
+        </div>
+    </div>
 
-            document.body.classList.remove('recall-mode', 'spotlight-mode');
-            document.querySelectorAll('.mem').forEach(m => m.classList.remove('peek'));
+    <!-- CARD 5: نظرية العرض (التعريف، الفرق، الدالة) -->
+    <div class="card" id="card5" data-id="5">
+        <div class="card-header">
+            <h2 class="card-title">5. نظرية العرض: التعريف، الفرق، والمعادلة الدالية</h2>
+            <span class="badge">الفصل الثاني</span>
+        </div>
+        <div class="content-box">
+            <div class="academic-view">
+                <ul>
+                    <li><b>تعريف عرض السوق:</b> الكميات التي يرتضي <span class="kw">البائعون والمنتجون</span> بيعها في <span class="kw">وقت معين</span>، مقابل مستويات مختلفة من الأسعار، وبافتراض <span class="kw">بقاء الأمور الأخرى على حالها</span>.</li>
+                    <li><b>طبيعة العلاقة:</b> يمثل جدول العرض العلاقة <span class="kw">الموجبة (الطردية)</span> بين السعر والكمية، باعتبار السعر هو <span class="kw">المتغير المستقل</span> والكمية هي <span class="kw">المتغير التابع</span>.</li>
+                    <li><b>التمييز بين العرض والكمية المعروضة:</b>
+                        <br>- <b>العرض:</b> يمثل <span class="kw">كافة العلاقة</span> بين السعر والكمية (قائمة الكميات كلها عند الأسعار المختلفة).
+                        <br>- <b>الكمية المعروضة:</b> تنصرف إلى <span class="kw">كمية معينة</span>، أي إلى <span class="kw">نقطة محددة</span> من قائمة الكميات أو من منحنى العرض.
+                    </li>
+                    <li><b>صيغة المعادلة الدالية:</b> <span class="kw">Qs = f(p)</span> وتعني أن الكمية المعروضة (Qs) هي دالة تابعة (f) للتغير في سعر السلعة (p).</li>
+                </ul>
+                <table class="eco-table">
+                    <thead>
+                        <tr>
+                            <th>سعر وحدة السلعة (دينار)</th>
+                            <td>200</td><td>300</td><td>400</td><td>500</td><td>600</td>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <th>الكمية المعروضة (شهرياً)</th>
+                            <td>600</td><td>1000</td><td>1300</td><td>1700</td><td>1900</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="street-view">
+                <b>☕ الفكرة بالعامية:</b><br>
+                بالعرض نلبس نظارة "التاجر أو أبو المحل". التاجر يحب السعر العالي، فكلما يصعد السعر بالسوق، يعرض بضاعة أكثر (علاقة طردية).<br>
+                <b>شنو الفرق بين العرض والكمية المعروضة؟</b><br>
+                الجدول كله من فوك لجوه اسمه <b>"العرض"</b>. بس من تكول "بسعر 400 دينار التاجر يبيع 1300 قطعة"، هاي النقطة لوحدها اسمها <b>"الكمية المعروضة"</b>.
+            </div>
+            <div class="graph-view">
+                <svg width="260" height="190" viewBox="0 0 260 190">
+                    <line x1="45" y1="15" x2="45" y2="155" stroke="#000" stroke-width="2"/>
+                    <line x1="45" y1="155" x2="235" y2="155" stroke="#000" stroke-width="2"/>
+                    <text x="25" y="25" font-weight="bold">P</text>
+                    <text x="240" y="160" font-weight="bold">Q</text>
+                    <line x1="65" y1="140" x2="205" y2="30" stroke="#059669" stroke-width="3"/>
+                    <text x="210" y="30" font-weight="bold" fill="#059669">S</text>
+                    <line x1="45" y1="125" x2="84" y2="125" stroke="#555" stroke-dasharray="3"/>
+                    <line x1="84" y1="125" x2="84" y2="155" stroke="#555" stroke-dasharray="3"/>
+                    <text x="15" y="130" font-size="11">200</text>
+                    <text x="75" y="170" font-size="11">600</text>
+                    <line x1="45" y1="50" x2="180" y2="50" stroke="#555" stroke-dasharray="3"/>
+                    <line x1="180" y1="50" x2="180" y2="155" stroke="#555" stroke-dasharray="3"/>
+                    <text x="15" y="55" font-size="11">500</text>
+                    <text x="168" y="170" font-size="11">1700</text>
+                </svg>
+            </div>
+        </div>
+        <div class="controls">
+            <button class="ctrl-btn btn-acad" onclick="switchMode('card5', 'acad')">📖 للامتحان</button>
+            <button class="ctrl-btn btn-str" onclick="switchMode('card5', 'str')">☕ بالعامية</button>
+            <button class="ctrl-btn btn-cloze" onclick="toggleCloze('card5')">🔑 فراغات ذكية</button>
+            <button class="ctrl-btn btn-graph" onclick="toggleGraph('card5')">📊 منحنى العرض</button>
+            <button class="ctrl-btn btn-hide" onclick="toggleBlur('card5')">👁️ إخفاء</button>
+            <button class="ctrl-btn btn-done" onclick="toggleMastery('card5')">✅ حفظتها</button>
+        </div>
+    </div>
 
-            if (mode === 'recall') {
-                document.body.classList.add('recall-mode');
-            } else if (mode === 'spotlight') {
-                document.body.classList.add('spotlight-mode');
+    <!-- CARD 6: نقطتان مهمتان في جدول العرض -->
+    <div class="card" id="card6" data-id="6">
+        <div class="card-header">
+            <h2 class="card-title">6. ملاحظتان أساسيتان حول جدول العرض</h2>
+            <span class="badge">شروط العرض</span>
+        </div>
+        <div class="content-box">
+            <div class="academic-view">
+                <ul>
+                    <li><b>1- تثبيت العوامل الأخرى:</b> يفترض جدول العرض أن الكميات المعروضة تتأثر فقط <span class="kw">بالأسعار المحتملة لنفس السلعة</span>. وهذا لا يعني عدم وجود عوامل أخرى تؤثر، لكننا نضطر إلى <span class="kw">تثبيت تلك العوامل</span> لكي نتمكن من التركيز على العلاقة بين سعر السلعة والكمية المعروضة منها، خاصة وأن أكثر تلك العوامل تحتاج إلى <span class="kw">وقت ما لكي تتغير</span>.</li>
+                    <li><b>2- أهمية عنصر الزمن:</b> الكميات المختلفة في جدول العرض يرتبط كل منها ليس فقط بسعر معين، ولكن <span class="kw">بزمن محدد أيضاً</span>. إذ لا يكفي القول بأن البائعين يرغبون بعرض (3000) وحدة عندما يكون السعر (250) ديناراً، بل يجب معرفة <span class="kw">الفترة الزمنية</span> (يومياً، شهرياً..)، لأن السلع تتفاوت من حيث <span class="kw">الوقت اللازم لإنتاجها</span>.</li>
+                </ul>
+            </div>
+            <div class="street-view">
+                <b>☕ الفكرة بالعامية:</b><br>
+                شرطين ما يصير ننساهن بجدول العرض:<br>
+                1. <b>تثبيت العوامل:</b> مثل من تريد تقيس تأثير كرت الشاشة وحده على الفريمات باللعبة، لازم تثبت باقي الإعدادات وما تلعب بيها.<br>
+                2. <b>الزمن المحدد:</b> من تكول "أبو المعمل يعرض 3000 قطعة بسعر 250 دينار" وتسكت، كلامك ناقص! لازم تحدد 3000 قطعة <b>باليوم لو بالشهر لو بالسنة؟</b> لأن إنتاج الصمون بـ 10 دقائق يختلف عن إنتاج السيارات اللي يطول شهور!
+            </div>
+        </div>
+        <div class="controls">
+            <button class="ctrl-btn btn-acad" onclick="switchMode('card6', 'acad')">📖 للامتحان</button>
+            <button class="ctrl-btn btn-str" onclick="switchMode('card6', 'str')">☕ بالعامية</button>
+            <button class="ctrl-btn btn-cloze" onclick="toggleCloze('card6')">🔑 فراغات ذكية</button>
+            <button class="ctrl-btn btn-hide" onclick="toggleBlur('card6')">👁️ إخفاء</button>
+            <button class="ctrl-btn btn-done" onclick="toggleMastery('card6')">✅ حفظتها</button>
+        </div>
+    </div>
+
+    <!-- CARD 7: تفسير العلاقة الطردية (الأرباح + تكلفة الإنتاج وسحب الموارد) -->
+    <div class="card" id="card7" data-id="7">
+        <div class="card-header">
+            <h2 class="card-title">7. تعليل: لماذا العلاقة طردية بين السعر والكمية المعروضة؟</h2>
+            <span class="badge">سؤال امتحاني مهم جداً</span>
+        </div>
+        <div class="content-box">
+            <div class="academic-view">
+                <ul>
+                    <li><b>المبرر الأول (هدف تعظيم الأرباح):</b> عندما يزداد سعر سلعة ما - مع ثبات أسعار المنتجات والمدخلات الأخرى - فإن <span class="kw">الربحية المتحققة</span> ستزداد أيضاً، مما يدفع المنتجين إلى <span class="kw">تحويل المصادر أو المستلزمات</span> من إنتاج السلع التي تحقق أرباحاً أقل، إلى إنتاج السلع التي تحقق <span class="kw">أرباحاً أكثر</span>.</li>
+                    <li><b>المبرر الثاني (نفقة / تكلفة الإنتاج):</b> لماذا ينبغي زيادة السعر لكي يزيد المنتجون الكمية؟
+                        <br>1. لأن زيادة الإنتاج من (السلعة أ مثلاً) يستلزم <span class="kw">تحويل أو سحب</span> المزيد من المصادر وعناصر الإنتاج التي كانت تعمل في إنتاج <span class="kw">سلع أخرى</span>.
+                        <br>2. هذا يفرض دفع <span class="kw">مكافآت أعلى</span> لأصحاب تلك المصادر والعناصر.
+                        <br>3. فضلاً عن ذلك فإن <span class="kw">كفاءة هذه المصادر</span> في إنتاج (السلعة أ) قد تكون <span class="kw">أقل من كفاءتها</span> في إنتاج سلع أخرى، مما يعني ارتفاع <span class="kw">متوسط تكلفة إنتاج وحدة السلعة</span>.
+                        <br>4. <b>النتيجة:</b> يتحمل المنتجون <span class="kw">ارتفاعاً مضطرداً</span> في تكلفة إنتاجها، الأمر الذي يستلزم زيادة سعر وحدة السلعة.
+                    </li>
+                </ul>
+            </div>
+            <div class="street-view">
+                <b>☕ الفكرة بالعامية (أهم فقرة بالملزمة):</b><br>
+                ليش المنتج ما يزيد إنتاجه إلا إذا صعد السعر؟ لسببين:<br>
+                <b>الأول (الطمع بالربح):</b> السعر صعد، فيحول عماله ومواده للبضاعة اللي تربح أكثر.<br>
+                <b>الثاني (ارتفاع التكلفة عليه):</b> من يريد يضاعف الإنتاج، عماله الأصليين ما يكفون! فيضطر <b>يسحب عمال وموارد</b> من غير مصلحة. هذوله العمال الجدد أولاً يطلبون <b>يوميات (مكافآت) أعلى</b> حتى يقبلون يجون، وثانياً إيدهم مو ماخذة عالشغلة الجديدة (<b>كفاءتهم أقل</b>)، فتطلع القطعة الوحدة مكلفة أكثر عالتاجر! لذلك لازم يبيع بسعر أغلى حتى يغطي هاي التكاليف الصاعدة.
+            </div>
+        </div>
+        <div class="controls">
+            <button class="ctrl-btn btn-acad" onclick="switchMode('card7', 'acad')">📖 للامتحان</button>
+            <button class="ctrl-btn btn-str" onclick="switchMode('card7', 'str')">☕ بالعامية</button>
+            <button class="ctrl-btn btn-cloze" onclick="toggleCloze('card7')">🔑 فراغات ذكية</button>
+            <button class="ctrl-btn btn-hide" onclick="toggleBlur('card7')">👁️ إخفاء</button>
+            <button class="ctrl-btn btn-done" onclick="toggleMastery('card7')">✅ حفظتها</button>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    // Reveal individual keyword when clicked in Cloze mode
+    document.querySelectorAll('.kw').forEach(span => {
+        span.addEventListener('click', function() {
+            if (this.closest('.content-box').classList.contains('cloze-active')) {
+                this.classList.toggle('revealed');
             }
-        }
+        });
+    });
 
-        // كشف الكلمة المخفية في طور التسميع
-        function peek(el) {
-            if (document.body.classList.contains('recall-mode')) {
-                el.classList.toggle('peek');
-            }
-        }
+    function switchMode(cardId, mode) {
+        const card = document.getElementById(cardId);
+        const box = card.querySelector('.content-box');
+        const acad = card.querySelector('.academic-view');
+        const str = card.querySelector('.street-view');
 
-        // تفعيل البطاقة في طور التركيز
-        function focusCard(card) {
-            if (document.body.classList.contains('spotlight-mode')) {
-                document.querySelectorAll('.bento-card').forEach(c => c.classList.remove('focused'));
-                card.classList.add('focused');
-            }
-        }
+        box.classList.remove('blurred');
 
-        // تأشير البطاقة كـ "تم فهمها"
-        function toggleDone(e, pill) {
-            e.stopPropagation();
-            const card = pill.closest('.bento-card');
-            card.classList.toggle('read-done');
+        if (mode === 'acad') {
+            acad.style.display = 'block';
+            str.style.display = 'none';
+        } else {
+            acad.style.display = 'none';
+            str.style.display = 'block';
         }
+    }
 
-        // التحقق من إجابات الاختبار السريع
-        function checkQuiz(btn, isCorrect) {
-            if (isCorrect) {
-                btn.classList.add('correct');
-                btn.innerText += " ✔ (إجابة صحيحة!)";
-            } else {
-                btn.classList.add('wrong');
-                btn.innerText += " ✖ (حاول مرة أخرى)";
-            }
+    function toggleCloze(cardId) {
+        const card = document.getElementById(cardId);
+        const box = card.querySelector('.content-box');
+        switchMode(cardId, 'acad'); // Ensure academic view is visible
+        box.classList.toggle('cloze-active');
+        // Reset revealed states
+        card.querySelectorAll('.kw').forEach(k => k.classList.remove('revealed'));
+    }
+
+    function toggleGraph(cardId) {
+        const card = document.getElementById(cardId);
+        const graph = card.querySelector('.graph-view');
+        if (graph) {
+            graph.style.display = (graph.style.display === 'block') ? 'none' : 'block';
         }
-    </script>
+    }
+
+    function toggleBlur(cardId) {
+        const card = document.getElementById(cardId);
+        const box = card.querySelector('.content-box');
+        box.classList.toggle('blurred');
+    }
+
+    function toggleMastery(cardId) {
+        const card = document.getElementById(cardId);
+        card.classList.toggle('mastered');
+        saveProgress();
+        updateProgressUI();
+    }
+
+    function updateProgressUI() {
+        const total = document.querySelectorAll('.card').length;
+        const mastered = document.querySelectorAll('.card.mastered').length;
+        const percent = Math.round((mastered / total) * 100);
+
+        document.getElementById('progressBar').style.width = percent + '%';
+        document.getElementById('progressCount').innerText = `${mastered} / ${total} بطاقات (${percent}%)`;
+    }
+
+    function saveProgress() {
+        const masteredIds = [];
+        document.querySelectorAll('.card.mastered').forEach(c => masteredIds.push(c.id));
+        localStorage.setItem('eco_mastered_cards', JSON.stringify(masteredIds));
+    }
+
+    function loadProgress() {
+        const saved = JSON.parse(localStorage.getItem('eco_mastered_cards') || '[]');
+        saved.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.classList.add('mastered');
+        });
+        updateProgressUI();
+    }
+
+    function resetProgress() {
+        localStorage.removeItem('eco_mastered_cards');
+        document.querySelectorAll('.card').forEach(c => c.classList.remove('mastered'));
+        updateProgressUI();
+    }
+
+    function filterCards(type, btn) {
+        document.querySelectorAll('.filter-bar .filter-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+
+        document.querySelectorAll('.card').forEach(card => {
+            const isMastered = card.classList.contains('mastered');
+            if (type === 'all') card.style.display = 'block';
+            else if (type === 'mastered') card.style.display = isMastered ? 'block' : 'none';
+            else if (type === 'unmastered') card.style.display = !isMastered ? 'block' : 'none';
+        });
+    }
+
+    function toggleDarkMode() {
+        document.body.classList.toggle('dark-mode');
+    }
+
+    // Initialize on load
+    loadProgress();
+</script>
+
 </body>
 </html>
